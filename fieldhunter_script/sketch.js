@@ -13,7 +13,7 @@ let long = -1;
 var database; // db ref
 var players; // liste alle spieler
 
-var hullPoints_size;
+var hullPoints_size = 0;
 
 let myMap;
 let coords = [];
@@ -40,7 +40,7 @@ function setup() {
   var firebaseConfig = {
     apiKey: "AIzaSyDMnC4vT3VmhMeaMzE1o8WR_OoydFLSssQ",
     authDomain: "fieldhunter2-9f40b.firebaseapp.com",
-    databaseURL: "https://fieldhunter2-9f40b-default-rtdb.firebaseio.com",
+    databaseURL: "https://fieldhunter2-9f40b.firebaseio.com",
     projectId: "fieldhunter2-9f40b",
     storageBucket: "fieldhunter2-9f40b.appspot.com",
     messagingSenderId: "1090412845541",
@@ -63,8 +63,6 @@ function setup() {
 }
 
 function draw() {
-  drawHull();
-  drawLine();
   drawPlayer();
   drawGui();
 }
@@ -93,6 +91,7 @@ function drawPlayer() {
       }
     }
   }
+  drawHull();
   drawLine();
   pop();
 }
@@ -114,14 +113,18 @@ function drawHull(){
   var points = [...coords];
   points.sort(sortPointX);
   points.sort(sortPointY);
-  if(points.length > 2) {
+  if(points.length > hullPoints_size) {
     hullPoints_size = chainHull_2D(points, points.length, hullPoints);
+  }
+  if(hullPoints_size > 3) {
+    noStroke();
+    fill('rgba(255, 0, 255, 0.3)');
     beginShape();
-    for (let i = 0; i < (hullPoints_size); i++) {
+    for (var i = 0; i < (hullPoints_size); i++) {
       var pos = myMap.latLngToPixel(hullPoints[i][0], hullPoints[i][1]);
       vertex(pos.x, pos.y);
     }
-    endShape();
+    endShape(CLOSE);
   }
   pop();
 }
