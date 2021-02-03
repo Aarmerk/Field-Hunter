@@ -103,7 +103,7 @@ function drawLine() {
     var pos2 = myMap.latLngToPixel(coords[i+1][0], coords[i+1][1]);
     stroke('rgba(255, 0, 255, 1)');
     strokeWeight(myMap.zoom() / 2);
-    line(pos1.x, pos1.y, pos2.x + i, pos2.y + i);
+    line(pos1.x, pos1.y, pos2.x, pos2.y);
   }
   pop();
 }
