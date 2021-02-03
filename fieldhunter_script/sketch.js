@@ -40,7 +40,7 @@ function setup() {
   var firebaseConfig = {
     apiKey: "AIzaSyDMnC4vT3VmhMeaMzE1o8WR_OoydFLSssQ",
     authDomain: "fieldhunter2-9f40b.firebaseapp.com",
-    databaseURL: "https://fieldhunter2-9f40b.firebaseio.com",
+    databaseURL: "https://fieldhunter2-9f40b-default-rtdb.firebaseio.com",
     projectId: "fieldhunter2-9f40b",
     storageBucket: "fieldhunter2-9f40b.appspot.com",
     messagingSenderId: "1090412845541",
