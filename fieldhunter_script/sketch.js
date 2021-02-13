@@ -186,7 +186,7 @@ function updateData() {
 
 function setupGui() {
   button = createButton('click me');
-  button.position((window.innerWidth * 0.90) + 20,  (window.innerHeight * 0.90) + 20);
+  button.position(window.innerWidth * 0.90,  window.innerHeight * 0.90);
   button.mousePressed(flyToPos);
 
   // eingebefeld für den namen
