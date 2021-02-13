@@ -52,7 +52,7 @@ function preload() {
 }
 
 function setup() {
-  canvas = createCanvas(windowWidth, windowHeight);
+  canvas = createCanvas(window.innerWidth, window.innerHeight);
   textFont(myFont, 20);
   textSize(20);
   hullAlpha = 200;
@@ -186,12 +186,12 @@ function updateData() {
 
 function setupGui() {
   button = createButton('click me');
-  button.position((windowWidth * 0.90) + 20,  (windowHeight * 0.90) + 20);
+  button.position((window.innerWidth * 0.90) + 20,  (window.innerHeight * 0.90) + 20);
   button.mousePressed(flyToPos);
 
     // eingebefeld für den namen
     pName = createInput();
-    pName.position((windowWidth * 0.90) - 50, 30);
+    pName.position((window.innerWidth * 0.90) - 50, 30);
     pName.value(getItem('demoName')); // holt pNamen aus coookie
 }
 
@@ -298,7 +298,7 @@ function drawGui() {
   } else {
     info += 'no geo';
   }
-  text(info, 30, (windowHeight * 0.90) + 20);
+  text(info, 30, (window.innerHeight * 0.90) + 20);
   stroke(0, 255, 0);
 }
 
