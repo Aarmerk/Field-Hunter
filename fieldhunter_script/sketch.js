@@ -189,10 +189,12 @@ function setupGui() {
   button.position((window.innerWidth * 0.90) + 20,  (window.innerHeight * 0.90) + 20);
   button.mousePressed(flyToPos);
 
-    // eingebefeld für den namen
-    pName = createInput();
-    pName.position((window.innerWidth * 0.90) - 50, 30);
-    pName.value(getItem('demoName')); // holt pNamen aus coookie
+  // eingebefeld für den namen
+  pName = createInput();
+  const inputPos = (window.innerWidth * 0.90) - 50;
+  pName.position(inputPos, 30);
+  pName.size(window.innerWidth - inputPos);
+  pName.value(getItem('demoName')); // holt pNamen aus coookie
 }
 
 
