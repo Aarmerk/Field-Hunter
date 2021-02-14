@@ -1,7 +1,5 @@
 let canvas;
 let myFont;
-//let gameWidth = window.innerWidth;
-//let gameHeight = window.innerHeight;
 
 // API key for map provider.
 var key = 'pk.eyJ1IjoiZmlkZWxkYSIsImEiOiJja2luOHk3dmMxMTNvMnZxanNubGJ2dW82In0.9WiB5IP8aDLBO-i6HBmtdQ';
@@ -86,11 +84,6 @@ function setup() {
 }
 
 function draw() {
-  /*if(gameWidth != window.innerWidth || gameHeight != window.innerHeight) {
-    gameWidth = window.innerWidth;
-    gameHeight = window.innerHeight;
-    canvas = resizeCanvas(gameWidth, gameHeight);
-  }*/
   clear();
   if(myMap != null) {
     drawPolygon();
@@ -186,15 +179,13 @@ function updateData() {
 
 function setupGui() {
   button = createButton('click me');
-  button.position(window.innerWidth * 0.90,  window.innerHeight * 0.90);
+  button.position((window.innerWidth * 0.90) + 20,  (window.innerHeight * 0.90) + 20);
   button.mousePressed(flyToPos);
 
-  // eingebefeld für den namen
-  pName = createInput();
-  const inputPos = (window.innerWidth * 0.90) - 50;
-  pName.position(inputPos, 30);
-  pName.size(window.innerWidth - inputPos);
-  pName.value(getItem('demoName')); // holt pNamen aus coookie
+    // eingebefeld für den namen
+    pName = createInput();
+    pName.position((window.innerWidth * 0.90) - 50, 30);
+    pName.value(getItem('demoName')); // holt pNamen aus coookie
 }
 
 
@@ -383,7 +374,7 @@ function intersects(p1, p2, q1, q2) {
   } else {
     lambda = ((q2.y - q1.y) * (q2.x - p1.x) + (q1.x - q2.x) * (q2.y - p1.y)) / det;
     gamma = ((p1.y - p2.y) * (q2.x - p1.x) + (p2.x - p1.x) * (q2.y - p1.y)) / det;
-    return ((-0.01 < lambda && lambda < 1.01) && (-0.01 < gamma && gamma < 1.01));
+    return ((-0.1 < lambda && lambda < 1.1) && (-0.1 < gamma && gamma < 1.1));
   }
 };
 
