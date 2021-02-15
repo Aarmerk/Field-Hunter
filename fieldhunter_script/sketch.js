@@ -1,8 +1,12 @@
 let canvas;
 let myFont;
 
-// API key for map provider.
-var key = 'pk.eyJ1IjoiZmlkZWxkYSIsImEiOiJja2luOHk3dmMxMTNvMnZxanNubGJ2dW82In0.9WiB5IP8aDLBO-i6HBmtdQ';
+// API key for map provider (Standard Streets Map)
+// var key = 'pk.eyJ1IjoiZmlkZWxkYSIsImEiOiJja2luOHk3dmMxMTNvMnZxanNubGJ2dW82In0.9WiB5IP8aDLBO-i6HBmtdQ';
+
+// API key for map provider (CUSTOM "Dark Mode" Streets Map)
+var key = 'pk.eyJ1Ijoic2ltdGluIiwiYSI6ImNraW5mODU2ajA4ZTUyem1sMGQ1MXRsYmYifQ.QiM3UZyf58-ehmisIRHQnw';
+
 
 // Create a new Mappa instance.
 var mappa = new Mappa('MapboxGL', key);
@@ -20,7 +24,9 @@ const options = {
   zoom: 16,
   //minZoom: 15,
   maxZoom: 22,
-  style: 'mapbox://styles/mapbox/streets-v11',
+  // CUSTOM "Dark Mode" Streets Map
+  style: 'mapbox://styles/simtin/ckl5nkoog2sf317qhmranwvs6',
+  // style: 'mapbox://styles/mapbox/streets-v11',
   pitch: 0,
 };
 
@@ -54,7 +60,7 @@ function setup() {
   textFont(myFont, 20);
   textSize(20);
   hullAlpha = 200;
-	theta = 0; 
+	theta = 0;
 
   var firebaseConfig = {
     apiKey: "AIzaSyDMnC4vT3VmhMeaMzE1o8WR_OoydFLSssQ",
@@ -101,7 +107,7 @@ function setupPosition(position) {
   long = position.longitude;
   options.lat = lat;
   options.lng = long;
-  myMap = mappa.tileMap(options); 
+  myMap = mappa.tileMap(options);
   myMap.overlay(canvas);
   if (coords.length < 1) {
     coords.push({x: lat, y: long});
@@ -176,13 +182,20 @@ function updateData() {
 }
 
 // Setup functions
+let button;
+let img;
+
+// function preload() {
+//   img = loadImage('LocationZoom_unclicked.png');
+// }
 
 function setupGui() {
-  button = createButton('click me');
+  button = createButton('Center location');
   button.position((window.innerWidth * 0.90) + 20,  (window.innerHeight * 0.90) + 20);
+  // button = new Button(img);
   button.mousePressed(flyToPos);
 
-    // eingebefeld für den namen
+    // eingabefeld für den namen
     pName = createInput();
     pName.position((window.innerWidth * 0.90) - 50, 30);
     pName.value(getItem('demoName')); // holt pNamen aus coookie
@@ -204,7 +217,7 @@ function drawPolygon(){
       vertex(pos.x, pos.y);
     }
     endShape(CLOSE);
-    
+
     hullAlpha -= alphaAmount;
     if (hullAlpha < 1) {
       hullPoints = [];
@@ -265,7 +278,7 @@ function drawPlayer() {
       if (k != uid) {
         var pos = myMap.latLngToPixel(players[k].lat, players[k].long);
         size = map(myMap.zoom(), 1, 6, 5, 7);
-        
+
         // Other
         stroke(255);
         fill(0, 255, 255)
@@ -346,19 +359,19 @@ function getIntersectionPoint(p1, p2, q1, q2) {
   }
   else {
     var det = getDeterminant(p1, p2, q1, q2);
-    // Line P represented as a1x + b1y = c1 
-    var a1 = p2.y - p1.y; 
-    var b1 = p1.x - p2.x; 
-    var c1 = a1*(p1.x) + b1*(p1.y); 
+    // Line P represented as a1x + b1y = c1
+    var a1 = p2.y - p1.y;
+    var b1 = p1.x - p2.x;
+    var c1 = a1*(p1.x) + b1*(p1.y);
 
-    // Line Q represented as a2x + b2y = c2 
-    var a2 = q2.y - q1.y; 
-    var b2 = q1.x - q2.x; 
-    var c2 = a2 * q1.x + b2 * q1.y; 
+    // Line Q represented as a2x + b2y = c2
+    var a2 = q2.y - q1.y;
+    var b2 = q1.x - q2.x;
+    var c2 = a2 * q1.x + b2 * q1.y;
 
-    var x = (b2 * c1 - b1 * c2) / det; 
-    var y = (a1 * c2 - a2 * c1) / det; 
-    return {x: x, y: y}; 
+    var x = (b2 * c1 - b1 * c2) / det;
+    var y = (a1 * c2 - a2 * c1) / det;
+    return {x: x, y: y};
   }
 
 }
