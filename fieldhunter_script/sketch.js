@@ -16,6 +16,8 @@ let myMap;
 let lat = -1; // wo bin ich
 let long = -1;
 let pName = "-"; // player name
+let score = 0;
+var ranking = [];
 
 // Map options
 const options = {
@@ -39,7 +41,6 @@ const posOptions = {
 let uid = gen_uid(); // unique brower/user id wird als db key benutze...
 var database; // db ref
 var players; // liste alle spieler
-var score = 0;
 
 // Saved coordinates
 let coords = [];
@@ -60,7 +61,7 @@ function setup() {
   textFont(myFont, 20);
   textSize(20);
   hullAlpha = 200;
-	theta = 0;
+  theta = 0;
 
   var firebaseConfig = {
     apiKey: "AIzaSyDMnC4vT3VmhMeaMzE1o8WR_OoydFLSssQ",
@@ -91,7 +92,7 @@ function setup() {
 
 function draw() {
   clear();
-  if(myMap != null) {
+  if (myMap != null) {
     drawPolygon();
     drawLine();
     drawPlayer();
@@ -110,7 +111,7 @@ function setupPosition(position) {
   myMap = mappa.tileMap(options);
   myMap.overlay(canvas);
   if (coords.length < 1) {
-    coords.push({x: lat, y: long});
+    coords.push({ x: lat, y: long });
   }
 }
 
@@ -121,12 +122,12 @@ function positionChanged(position) {
   }
   lat = position.latitude;
   long = position.longitude;
-  const newCoord = {x: lat, y: long};
-  if(coords.length > 0) {
+  const newCoord = { x: lat, y: long };
+  if (coords.length > 0) {
     // Push if unique
-    if(coords[coords.length - 1].x != newCoord.x || coords[coords.length - 1].y != newCoord.y) {
+    if (coords[coords.length - 1].x != newCoord.x || coords[coords.length - 1].y != newCoord.y) {
       // Push if point doesn't cause intersection
-      if(coords.length >= 3 && setLinesIntersect(newCoord)) {
+      if (coords.length >= 3 && setLinesIntersect(newCoord)) {
         return;
       }
       coords.push(newCoord);
@@ -169,7 +170,8 @@ function updatePlayerData() {
   firebase.database().ref('player/' + uid).set({
     lat: lat,
     long: long,
-    //name: pName,
+    name: pName.value(),
+    score: score,
     timestamp: Date.now()
   });
 }
@@ -179,11 +181,12 @@ function updateData() {
   maintenancePlayerData(); // kill all zombies
   getAllPlayerData(); // alle anders player daten holen
   storeItem('demoName', pName.value()); // meinen player namen im coookie speichern
+  getRanking();
 }
 
 // Setup functions
 let button;
-let img;
+//let img = loadImage("D:\Desktop\Uni\Semester 3\Experimental Mobile PLay\FieldhunterGithub\button\LocationZoom_unclicked.png");
 
 // function preload() {
 //   img = loadImage('LocationZoom_unclicked.png');
@@ -191,22 +194,22 @@ let img;
 
 function setupGui() {
   button = createButton('Center location');
-  button.position((window.innerWidth * 0.90) + 20,  (window.innerHeight * 0.90) + 20);
-  // button = new Button(img);
+  //button = new Button(img);
+  button.position((window.innerWidth * 0.95), (window.innerHeight * 0.95));
   button.mousePressed(flyToPos);
 
-    // eingabefeld für den namen
-    pName = createInput();
-    pName.position((window.innerWidth * 0.90) - 50, 30);
-    pName.value(getItem('demoName')); // holt pNamen aus coookie
+  // eingabefeld für den namen
+  pName = createInput();
+  pName.position((window.innerWidth * 0.90), (window.innerHeight * 0.02));
+  pName.value(getItem('demoName')); // holt pNamen aus coookie
 }
 
 
 // Draw functions
 
-function drawPolygon(){
+function drawPolygon() {
   push();
-  if(linesIntersect) {
+  if (linesIntersect) {
     noStroke();
     hullColor = color(255, 0, 255);
     hullColor.setAlpha(hullAlpha);
@@ -236,7 +239,7 @@ function drawLine() {
     stroke('rgba(255, 0, 255, 1)');
     strokeWeight(myMap.zoom() / 2);
     line(pos1.x, pos1.y, pos2.x, pos2.y);
-    if(linesIntersect && i == coords.length - 2) {
+    if (linesIntersect && i == coords.length - 2) {
       var pos3 = myMap.latLngToPixel(coords[0].x, coords[0].y);
       line(pos2.x, pos2.y, pos3.x, pos3.y);
 
@@ -255,7 +258,7 @@ function drawPlayer() {
   var diam = (((size / 2) * 0.7 * theta) % maxDiameter) + size;
   noStroke();
   var playerColor = color(255, 0, 255);
-  playerColor.setAlpha(150 - (diam *  (150 / maxDiameter)));
+  playerColor.setAlpha(150 - (diam * (150 / maxDiameter)));
   fill(playerColor);
   ellipse(mypos.x, mypos.y, diam, diam);
   theta += (maxDiameter / 250);
@@ -294,8 +297,31 @@ function drawPlayer() {
   pop();
 }
 
+function getRanking() {
+  if (players != null) {
+    var keys = Object.keys(players);
+    for (var i = 0; i < keys.length; i++) {
+     for ( var j = 0; j< keys.length; j++) {
+        var k = keys[i];
+        if(k.score > keys[j].score){
+          if(rankings.length <5){
+            rankings.push(k);
+          } else {
+            for (var r= 0; r < rankings.length; r++){
+              if(k.score > ranking[r].score)
+              ranking.splice(r,1);
+              ranking.push(k);
+            }
+          }
+        }
+     } 
+    }
+    ranking = ranking.sort((f,s) => s -f);
+  }
+}
+
 function drawGui() {
-  textSize(15);
+  textSize(20);
   noStroke();
   fill(0);
   var info = "score = " + score;
@@ -304,32 +330,43 @@ function drawGui() {
   } else {
     info += 'no geo';
   }
-  text(info, 30, (window.innerHeight * 0.90) + 20);
+  fill(255, 0, 255);
+  text(info, windowWidth / 2.2, 30);
   stroke(0, 255, 0);
+
+  if(ranking!=null){
+  var highscore = "Rankings: \n";
+  for (var i = 0; i < ranking.length; i++){
+    highscore += ranking[i].name + ": " + ranking[i].score + "\n";
+  }
+  fill(255,0,255);
+  text(highscore, windowWidth*0.9, windowHeight*0.5);
+  stroke(0,255,0);
+}
 }
 
 
 
 // Math functions
 
-function measure(point1, point2){  // generally used geo measurement function
+function measure(point1, point2) {  // generally used geo measurement function
   var R = 6378.137; // Radius of earth in KM
   var dLat = point2.x * Math.PI / 180 - point1.x * Math.PI / 180;
   var dLon = point2.y * Math.PI / 180 - point1.y * Math.PI / 180;
-  var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-  Math.cos(point1.x * Math.PI / 180) * Math.cos(point2.x * Math.PI / 180) *
-  Math.sin(dLon/2) * Math.sin(dLon/2);
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(point1.x * Math.PI / 180) * Math.cos(point2.x * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   var d = R * c;
   return d * 1000; // meters
 }
 
 function setLinesIntersect(newPoint) {
-  if(coords < 3) {
+  if (coords < 3) {
     return linesIntersect;
   }
   // Intersects if new point near first point
-  if(Math.abs(coords[0].x - newPoint.x) < 1e-6 && Math.abs(coords[0].y - newPoint.y) < 1e-6) {
+  if (Math.abs(coords[0].x - newPoint.x) < 1e-6 && Math.abs(coords[0].y - newPoint.y) < 1e-6) {
     linesIntersect = true;
     hullPoints = [...coords];
     coords = [];
@@ -340,7 +377,7 @@ function setLinesIntersect(newPoint) {
   var intersection;
   for (var i = 0; i < coords.length - 2; i++) {
     intersection = getIntersectionPoint(coords[i], coords[i + 1], coords[coords.length - 1], newPoint);
-    if(intersection != null) {
+    if (intersection != null) {
       linesIntersect = true;
       hullPoints = [...coords];
       hullPoints.splice(0, i + 1);
@@ -354,7 +391,7 @@ function setLinesIntersect(newPoint) {
 }
 
 function getIntersectionPoint(p1, p2, q1, q2) {
-  if(intersects(p1, p2, q1, q2) == false){
+  if (intersects(p1, p2, q1, q2) == false) {
     return null;
   }
   else {
@@ -362,7 +399,7 @@ function getIntersectionPoint(p1, p2, q1, q2) {
     // Line P represented as a1x + b1y = c1
     var a1 = p2.y - p1.y;
     var b1 = p1.x - p2.x;
-    var c1 = a1*(p1.x) + b1*(p1.y);
+    var c1 = a1 * (p1.x) + b1 * (p1.y);
 
     // Line Q represented as a2x + b2y = c2
     var a2 = q2.y - q1.y;
@@ -371,7 +408,7 @@ function getIntersectionPoint(p1, p2, q1, q2) {
 
     var x = (b2 * c1 - b1 * c2) / det;
     var y = (a1 * c2 - a2 * c1) / det;
-    return {x: x, y: y};
+    return { x: x, y: y };
   }
 
 }
@@ -400,7 +437,7 @@ function getDeterminant(p1, p2, q1, q2) {
   return px * qy - qx * py;
 }
 
-function polygonArea(polygon){
+function polygonArea(polygon) {
   var total = 0;
 
   for (var i = 0, l = polygon.length; i < l; i++) {
@@ -422,7 +459,7 @@ function increaseScore() {
 
 
 function flyToPos() {
-  myMap.map.flyTo({center: [long, lat]});
+  myMap.map.flyTo({ center: [long, lat] });
 }
 
 
