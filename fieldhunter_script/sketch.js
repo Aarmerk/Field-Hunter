@@ -134,7 +134,8 @@ function positionChanged(position) {
   const newCoord = {x: lat, y: long};
   if(coords.length > 0) {
     // Push if unique
-    if(coords[coords.length - 1].x != newCoord.x || coords[coords.length - 1].y != newCoord.y) {
+    if(measure(coords[coords.length - 1], newCoord) > 1.0) {
+    //if(coords[coords.length - 1].x != newCoord.x || coords[coords.length - 1].y != newCoord.y) {
       // Push if point doesn't cause intersection
       if(coords.length >= 3 && setLinesIntersect(newCoord)) {
         return;
