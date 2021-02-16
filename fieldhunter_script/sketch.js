@@ -256,7 +256,7 @@ function drawPlayer() {
   theta += (maxDiameter / 250);
 
   //Player
-  stroke(0);
+  stroke(255);
   fill(255, 0, 255);
   ellipse(mypos.x, mypos.y, size, size);
 
@@ -275,7 +275,7 @@ function drawPlayer() {
         size = map(myMap.zoom(), 1, 6, 5, 7);
         
         // Other
-        stroke(0);
+        stroke(255);
         fill(0, 255, 255)
         ellipse(pos.x, pos.y, size, size);
 
