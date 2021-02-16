@@ -34,7 +34,7 @@ var database; // db ref
 var players; // liste alle spieler
 var score = 0;
 let pName = "-"; // player name
-var ranking = [];
+let ranking = [];
 
 // Saved coordinates
 let coords = [];
@@ -194,7 +194,7 @@ function updateData() {
   maintenancePlayerData(); // kill all zombies
   getAllPlayerData(); // alle anders player daten holen
   storeItem('demoName', pName.value()); // meinen player namen im coookie speichern
-  getRanking();
+  sortRanking();
 }
 
 
@@ -299,39 +299,34 @@ function drawGui() {
   fill(255, 0, 255);
   text(info, 20, 75);
   pop();
-  if (ranking != null){
-    var highscore = "Rankings: \n";
-    for (var i = 0; i < ranking.length; i++){
+  if (players != null){
+    var highscore = "";
+    scoreLenght = ranking.length < 5 ? ranking.length : 5;
+    for (var i = 0; i < scoreLenght; i++) {
       highscore += ranking[i].name + ": " + ranking[i].score + "\n";
     }
     fill(0,255,255);
+    textSize(20)
     stroke(255);
-    text(highscore, 20, 100);
+    text("Rankings:", 20, 100);
+
+    fill(255,255,0);
+    textSize(12);
+    text(highscore, 20, 120);
   }
 }
 
-function getRanking() {
-  if (players != null) {
-    var keys = Object.keys(players);
-    for (var i = 0; i < keys.length; i++) {
-      for (var j = 0; j< keys.length; j++) {
-        var k = keys[i];
-        if (k.score > keys[j].score) {
-          if(rankings.length < 5) {
-            rankings.push(k);
-          } else {
-            for (var r= 0; r < rankings.length; r++) {
-              if (k.score > ranking[r].score) {
-                ranking.splice(r,1);
-                ranking.push(k);
-              }
-            }
-          }
-        }
-     } 
-    }
-    ranking = ranking.sort((f,s) => s -f);
+function sortRanking() {
+  if(players == null) {
+    return;
   }
+  var keys = Object.keys(players);
+  ranking = [];
+  for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      ranking.push(players[k]);
+  }
+  ranking.sort((a,b) => b.score - a.score);
 }
 
 
@@ -468,6 +463,7 @@ function gen_uid() {
   uid += screen_info.pixelDepth || '';
   return uid;
 }
+
 
 function centerCanvas() {
   var x = (windowWidth - width) / 2;
