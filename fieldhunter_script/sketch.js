@@ -1,12 +1,8 @@
 let canvas;
 let myFont;
 
-// API key for map provider (Standard Streets Map)
-// var key = 'pk.eyJ1IjoiZmlkZWxkYSIsImEiOiJja2luOHk3dmMxMTNvMnZxanNubGJ2dW82In0.9WiB5IP8aDLBO-i6HBmtdQ';
-
-// API key for map provider (CUSTOM "Dark Mode" Streets Map)
+// API key for map provider.
 var key = 'pk.eyJ1Ijoic2ltdGluIiwiYSI6ImNraW5mODU2ajA4ZTUyem1sMGQ1MXRsYmYifQ.QiM3UZyf58-ehmisIRHQnw';
-
 
 // Create a new Mappa instance.
 var mappa = new Mappa('MapboxGL', key);
@@ -15,7 +11,6 @@ const version = "21";
 let myMap;
 let lat = -1; // wo bin ich
 let long = -1;
-let pName = "-"; // player name
 
 // Map options
 const options = {
@@ -24,9 +19,7 @@ const options = {
   zoom: 16,
   //minZoom: 15,
   maxZoom: 22,
-  // CUSTOM "Dark Mode" Streets Map
   style: 'mapbox://styles/simtin/ckl5nkoog2sf317qhmranwvs6',
-  // style: 'mapbox://styles/mapbox/streets-v11',
   pitch: 0,
 };
 
@@ -40,6 +33,8 @@ let uid = gen_uid(); // unique brower/user id wird als db key benutze...
 var database; // db ref
 var players; // liste alle spieler
 var score = 0;
+let pName = "-"; // player name
+var ranking = [];
 
 // Saved coordinates
 let coords = [];
@@ -56,11 +51,14 @@ function preload() {
 }
 
 function setup() {
-  canvas = createCanvas(window.innerWidth, window.innerHeight);
+  noCanvas();
+  canvas = createCanvas(windowWidth, windowHeight);
+  canvas.style('display', 'block');
+  centerCanvas();
   textFont(myFont, 20);
   textSize(20);
   hullAlpha = 200;
-	theta = 0;
+	theta = 0; 
 
   var firebaseConfig = {
     apiKey: "AIzaSyDMnC4vT3VmhMeaMzE1o8WR_OoydFLSssQ",
@@ -91,7 +89,7 @@ function setup() {
 
 function draw() {
   clear();
-  if(myMap != null) {
+  if(lat != -1) {
     drawPolygon();
     drawLine();
     drawPlayer();
@@ -107,11 +105,23 @@ function setupPosition(position) {
   long = position.longitude;
   options.lat = lat;
   options.lng = long;
-  myMap = mappa.tileMap(options);
+  myMap = mappa.tileMap(options); 
   myMap.overlay(canvas);
   if (coords.length < 1) {
     coords.push({x: lat, y: long});
   }
+}
+
+function setupGui() {
+    // Button für das Fixieren
+    button = createButton('click me');
+    button.position(20, windowHeight - 50);
+    button.mousePressed(flyToPos);
+  
+    // Eingebefeld für den namen
+    pName = createInput();
+    pName.position(20, 30);
+    pName.value(getItem('demoName')); // holt pNamen aus coookie
 }
 
 function positionChanged(position) {
@@ -124,7 +134,8 @@ function positionChanged(position) {
   const newCoord = {x: lat, y: long};
   if(coords.length > 0) {
     // Push if unique
-    if(coords[coords.length - 1].x != newCoord.x || coords[coords.length - 1].y != newCoord.y) {
+    if(measure(coords[coords.length - 1], newCoord) > 1.0) {
+    //if(coords[coords.length - 1].x != newCoord.x || coords[coords.length - 1].y != newCoord.y) {
       // Push if point doesn't cause intersection
       if(coords.length >= 3 && setLinesIntersect(newCoord)) {
         return;
@@ -169,7 +180,8 @@ function updatePlayerData() {
   firebase.database().ref('player/' + uid).set({
     lat: lat,
     long: long,
-    //name: pName,
+    name: pName.value(),
+    score: score,
     timestamp: Date.now()
   });
 }
@@ -179,26 +191,7 @@ function updateData() {
   maintenancePlayerData(); // kill all zombies
   getAllPlayerData(); // alle anders player daten holen
   storeItem('demoName', pName.value()); // meinen player namen im coookie speichern
-}
-
-// Setup functions
-let button;
-let img;
-
-// function preload() {
-//   img = loadImage('LocationZoom_unclicked.png');
-// }
-
-function setupGui() {
-  button = createButton('Center location');
-  button.position((window.innerWidth * 0.90) + 20,  (window.innerHeight * 0.90) + 20);
-  // button = new Button(img);
-  button.mousePressed(flyToPos);
-
-    // eingabefeld für den namen
-    pName = createInput();
-    pName.position((window.innerWidth * 0.90) - 50, 30);
-    pName.value(getItem('demoName')); // holt pNamen aus coookie
+  getRanking();
 }
 
 
@@ -217,7 +210,7 @@ function drawPolygon(){
       vertex(pos.x, pos.y);
     }
     endShape(CLOSE);
-
+    
     hullAlpha -= alphaAmount;
     if (hullAlpha < 1) {
       hullPoints = [];
@@ -239,7 +232,6 @@ function drawLine() {
     if(linesIntersect && i == coords.length - 2) {
       var pos3 = myMap.latLngToPixel(coords[0].x, coords[0].y);
       line(pos2.x, pos2.y, pos3.x, pos3.y);
-
     }
   }
   pop();
@@ -278,7 +270,7 @@ function drawPlayer() {
       if (k != uid) {
         var pos = myMap.latLngToPixel(players[k].lat, players[k].long);
         size = map(myMap.zoom(), 1, 6, 5, 7);
-
+        
         // Other
         stroke(255);
         fill(0, 255, 255)
@@ -286,7 +278,7 @@ function drawPlayer() {
 
         // Other name
         stroke(255);
-        fill(0);
+        fill(0, 255, 255);
         text(players[k].name, pos.x + 20, pos.y);
       }
     }
@@ -295,19 +287,49 @@ function drawPlayer() {
 }
 
 function drawGui() {
-  textSize(15);
-  noStroke();
-  fill(0);
+  push();
   var info = "score = " + score;
-  if (geoCheck() == true) {
-    info += '\nlat = ' + lat + ' long = ' + long;
-  } else {
-    info += 'no geo';
+  textSize(20);
+  textAlign(CENTER);
+  textStyle(BOLD);
+  stroke(0);
+  fill(255);
+  text(info, windowWidth / 2, 30);
+  pop();
+  if (ranking != null){
+    var highscore = "Rankings: \n";
+    for (var i = 0; i < ranking.length; i++){
+      highscore += ranking[i].name + ": " + ranking[i].score + "\n";
+    }
+    fill(255,0,255);
+    stroke(255);
+    text(highscore, 20, 100);
   }
-  text(info, 30, (window.innerHeight * 0.90) + 20);
-  stroke(0, 255, 0);
 }
 
+function getRanking() {
+  if (players != null) {
+    var keys = Object.keys(players);
+    for (var i = 0; i < keys.length; i++) {
+      for (var j = 0; j< keys.length; j++) {
+        var k = keys[i];
+        if (k.score > keys[j].score) {
+          if(rankings.length < 5) {
+            rankings.push(k);
+          } else {
+            for (var r= 0; r < rankings.length; r++) {
+              if (k.score > ranking[r].score) {
+                ranking.splice(r,1);
+                ranking.push(k);
+              }
+            }
+          }
+        }
+     } 
+    }
+    ranking = ranking.sort((f,s) => s -f);
+  }
+}
 
 
 // Math functions
@@ -359,19 +381,19 @@ function getIntersectionPoint(p1, p2, q1, q2) {
   }
   else {
     var det = getDeterminant(p1, p2, q1, q2);
-    // Line P represented as a1x + b1y = c1
-    var a1 = p2.y - p1.y;
-    var b1 = p1.x - p2.x;
-    var c1 = a1*(p1.x) + b1*(p1.y);
+    // Line P represented as a1x + b1y = c1 
+    var a1 = p2.y - p1.y; 
+    var b1 = p1.x - p2.x; 
+    var c1 = a1*(p1.x) + b1*(p1.y); 
 
-    // Line Q represented as a2x + b2y = c2
-    var a2 = q2.y - q1.y;
-    var b2 = q1.x - q2.x;
-    var c2 = a2 * q1.x + b2 * q1.y;
+    // Line Q represented as a2x + b2y = c2 
+    var a2 = q2.y - q1.y; 
+    var b2 = q1.x - q2.x; 
+    var c2 = a2 * q1.x + b2 * q1.y; 
 
-    var x = (b2 * c1 - b1 * c2) / det;
-    var y = (a1 * c2 - a2 * c1) / det;
-    return {x: x, y: y};
+    var x = (b2 * c1 - b1 * c2) / det; 
+    var y = (a1 * c2 - a2 * c1) / det; 
+    return {x: x, y: y}; 
   }
 
 }
@@ -422,7 +444,7 @@ function increaseScore() {
 
 
 function flyToPos() {
-  myMap.map.flyTo({center: [long, lat]});
+  myMap.map.flyTo({center: [long, lat], zoom: 18});
 }
 
 
@@ -442,4 +464,15 @@ function gen_uid() {
   uid += screen_info.width || '';
   uid += screen_info.pixelDepth || '';
   return uid;
+}
+
+function centerCanvas() {
+  var x = (windowWidth - width) / 2;
+  var y = (windowHeight - height) / 2;
+  canvas.position(x, y);
+}
+
+function windowResized() {
+  // assigns new values for width and height variables
+  centerCanvas();
 }
