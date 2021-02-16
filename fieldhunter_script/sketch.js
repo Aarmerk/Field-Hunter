@@ -121,6 +121,7 @@ function setupGui() {
     // Eingebefeld für den namen
     pName = createInput();
     pName.position(20, 30);
+    pName.style('width: 85px');
     pName.value(getItem('demoName')); // holt pNamen aus coookie
 }
 
@@ -290,20 +291,20 @@ function drawPlayer() {
 
 function drawGui() {
   push();
-  var info = "score = " + score;
+  var info = "Score = " + score;
   textSize(20);
-  textAlign(CENTER);
+  textAlign(LEFT);
   textStyle(BOLD);
-  stroke(0);
-  fill(255);
-  text(info, windowWidth / 2, 30);
+  stroke(255);
+  fill(255, 0, 255);
+  text(info, 20, 75);
   pop();
   if (ranking != null){
     var highscore = "Rankings: \n";
     for (var i = 0; i < ranking.length; i++){
       highscore += ranking[i].name + ": " + ranking[i].score + "\n";
     }
-    fill(255,0,255);
+    fill(0,255,255);
     stroke(255);
     text(highscore, 20, 100);
   }
