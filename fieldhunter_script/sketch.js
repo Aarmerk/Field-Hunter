@@ -14,6 +14,8 @@ const version = "21";
 let myMap;
 let lat = -1; // wo bin ich
 let long = -1;
+let gameWidth = window.innerWidth;
+let gameHeight = window.innerHeight;
 
 // Map options
 const options = {
@@ -59,9 +61,8 @@ function preload() {
 
 function setup() {
   noCanvas();
-  canvas = createCanvas(windowWidth, windowHeight);
+  canvas = createCanvas(gameWidth, gameHeight);
   canvas.style('display', 'block');
-  centerCanvas();
   textFont(myFont, 20);
   textSize(20);
   hullAlpha = 200;
@@ -128,7 +129,7 @@ function setupGui() {
 
   // Button für das Fixieren
   for(var i = 0; i < buttonImgs.length; i++) {
-    buttons[i] = new Button(20, windowHeight - 70, 40, 40, buttonImgs[i]);
+    buttons[i] = new Button(20, gameHeight - 70, 40, 40, buttonImgs[i]);
   }
 }
 
@@ -578,18 +579,6 @@ function gen_uid() {
   uid += screen_info.width || '';
   uid += screen_info.pixelDepth || '';
   return uid;
-}
-
-
-function centerCanvas() {
-  var x = (windowWidth - width) / 2;
-  var y = (windowHeight - height) / 2;
-  canvas.position(x, y);
-}
-
-function windowResized() {
-  // assigns new values for width and height variables
-  centerCanvas();
 }
 
 
