@@ -375,7 +375,11 @@ function setLinesIntersect(newPoint) {
 }
 
 function getIntersectionPoint(p1, p2, q1, q2) {
-  if(intersects(p1, p2, q1, q2) == false){
+  utmP1 = myMap.latLngToPixel(p1.x, p1.y);
+  utmP2 = myMap.latLngToPixel(p2.x, p2.y);
+  utmQ1 = myMap.latLngToPixel(q1.x, q1.y);
+  utmQ2 = myMap.latLngToPixel(q2.x, q2.y);
+  if(intersects(utmP1,utmP2, utmQ1, utmQ2) == false){
     return null;
   }
   else {
@@ -438,7 +442,7 @@ function polygonArea(polygon){
 }
 
 function increaseScore() {
-  score += (round(polygonArea(hullPoints) * 10000000000000));
+  score += (round(polygonArea(hullPoints) * 1000000000));
 }
 
 
