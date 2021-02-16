@@ -256,7 +256,7 @@ function drawPlayer() {
   theta += (maxDiameter / 250);
 
   //Player
-  stroke(255);
+  stroke(0);
   fill(255, 0, 255);
   ellipse(mypos.x, mypos.y, size, size);
 
@@ -275,12 +275,12 @@ function drawPlayer() {
         size = map(myMap.zoom(), 1, 6, 5, 7);
         
         // Other
-        stroke(255);
+        stroke(0);
         fill(0, 255, 255)
         ellipse(pos.x, pos.y, size, size);
 
         // Other name
-        stroke(255);
+        stroke(0);
         fill(0, 255, 255);
         text(players[k].name, pos.x + 20, pos.y);
       }
@@ -295,7 +295,7 @@ function drawGui() {
   textSize(20);
   textAlign(LEFT);
   textStyle(BOLD);
-  stroke(255);
+  stroke(0);
   fill(255, 0, 255);
   text(info, 20, 75);
   pop();
@@ -307,11 +307,12 @@ function drawGui() {
     }
     fill(0,255,255);
     textSize(20)
-    stroke(255);
+    stroke(0);
     text("Rankings:", 20, 100);
 
     fill(255,255,0);
     textSize(12);
+    stroke(0);
     text(highscore, 20, 120);
   }
 }
