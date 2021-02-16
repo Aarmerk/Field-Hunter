@@ -129,13 +129,13 @@ function positionChanged(position) {
     setupPosition(position);
     return;
   }
-  lat = position.latitude;
-  long = position.longitude;
-  const newCoord = {x: lat, y: long};
+  const newCoord = {x: position.latitude, y: position.longitude};
   if(coords.length > 0) {
     // Push if unique
     if(measure(coords[coords.length - 1], newCoord) > 1.0) {
     //if(coords[coords.length - 1].x != newCoord.x || coords[coords.length - 1].y != newCoord.y) {
+      lat = position.latitude;
+      long = position.longitude;
       // Push if point doesn't cause intersection
       if(coords.length >= 3 && setLinesIntersect(newCoord)) {
         return;
@@ -143,6 +143,8 @@ function positionChanged(position) {
       coords.push(newCoord);
     }
   } else {
+    lat = position.latitude;
+    long = position.longitude;
     coords.push(newCoord);
   }
 }
