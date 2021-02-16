@@ -1,5 +1,6 @@
 let canvas;
 let myFont;
+let buttonImg;
 
 // API key for map provider.
 var key = 'pk.eyJ1Ijoic2ltdGluIiwiYSI6ImNraW5mODU2ajA4ZTUyem1sMGQ1MXRsYmYifQ.QiM3UZyf58-ehmisIRHQnw';
@@ -24,7 +25,7 @@ const options = {
 };
 
 // Position options
-const posOptions = {
+var posOptions = {
   enableHighAccuracy: true
 }
 
@@ -48,6 +49,7 @@ var theta;
 
 function preload() {
   myFont = loadFont('Ligconsolata-Regular.otf');
+  buttonImg = loadImage('../button/LocationZoom_unclicked.png')
 }
 
 function setup() {
@@ -114,10 +116,12 @@ function setupPosition(position) {
 
 function setupGui() {
     // Button für das Fixieren
-    button = createButton('click me');
-    button.position(20, windowHeight - 50);
+    button = createImg('../button/LocationZoom_clicked.png');
+    button.position(10, windowHeight - 60);
+    button.style('width: 30px');
     button.mousePressed(flyToPos);
-  
+    button.mouseOver(changeToBlue);
+
     // Eingebefeld für den namen
     pName = createInput();
     pName.position(20, 30);
@@ -137,6 +141,9 @@ function positionChanged(position) {
     //if(coords[coords.length - 1].x != newCoord.x || coords[coords.length - 1].y != newCoord.y) {
       lat = position.latitude;
       long = position.longitude;
+      if(posOptions.enableHighAccuracy) {
+        posOptions.enableHighAccuracy = false;
+      }
       // Push if point doesn't cause intersection
       if(coords.length >= 3 && setLinesIntersect(newCoord)) {
         return;
@@ -427,6 +434,7 @@ function getDeterminant(p1, p2, q1, q2) {
   return px * qy - qx * py;
 }
 
+// Returns the area of a polygon using an array of lat/long coordinates
 function polygonArea(polygon){
   var total = 0;
 
@@ -531,9 +539,15 @@ function increaseScore() {
 
 // fly to position
 function flyToPos() {
+  if(!posOptions.enableHighAccuracy) {
+    posOptions.enableHighAccuracy = true;
+  }
   myMap.map.flyTo({center: [long, lat], zoom: 18});
 }
 
+function changeToBlue() {
+  
+}
 
 
 function gen_uid() {
