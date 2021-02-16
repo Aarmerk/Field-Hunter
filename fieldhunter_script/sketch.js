@@ -374,12 +374,14 @@ function setLinesIntersect(newPoint) {
   return false;
 }
 
-function getIntersectionPoint(p1, p2, q1, q2) {
-  utmP1 = myMap.latLngToPixel(p1.x, p1.y);
-  utmP2 = myMap.latLngToPixel(p2.x, p2.y);
-  utmQ1 = myMap.latLngToPixel(q1.x, q1.y);
-  utmQ2 = myMap.latLngToPixel(q2.x, q2.y);
-  if(intersects(utmP1,utmP2, utmQ1, utmQ2) == false){
+// Returns intersectios point by converting them first into mercator value, then returns
+// the point with langitude and longitude
+function getIntersectionPoint(a, b, c, d) {
+  var p1 = merc(a);
+  var p2 = merc(b);
+  var q1 = merc(c);
+  var q2 = merc(d);
+  if(intersects(p1, p2, q1, q2) == false){
     return null;
   }
   else {
@@ -396,7 +398,7 @@ function getIntersectionPoint(p1, p2, q1, q2) {
 
     var x = (b2 * c1 - b1 * c2) / det; 
     var y = (a1 * c2 - a2 * c1) / det; 
-    return {x: x, y: y}; 
+    return mercToLatLong({x: x, y: y}); 
   }
 
 }
@@ -429,10 +431,10 @@ function polygonArea(polygon){
   var total = 0;
 
   for (var i = 0, l = polygon.length; i < l; i++) {
-    var addX = polygon[i].x;
-    var addY = polygon[i == polygon.length - 1 ? 0 : i + 1].y;
-    var subX = polygon[i == polygon.length - 1 ? 0 : i + 1].x;
-    var subY = polygon[i].y;
+    var addX = merc_x(polygon[i].x);
+    var addY = merc_y(polygon[i == polygon.length - 1 ? 0 : i + 1].y);
+    var subX = merc_x(polygon[i == polygon.length - 1 ? 0 : i + 1].x);
+    var subY = merc_y(polygon[i].y);
 
     total += (addX * addY * 0.5);
     total -= (subX * subY * 0.5);
@@ -441,11 +443,93 @@ function polygonArea(polygon){
   return Math.abs(total);
 }
 
-function increaseScore() {
-  score += (round(polygonArea(hullPoints) * 1000000000));
+ //Mercator transformations
+function deg_rad(ang) {
+  return ang * (Math.PI/180.0)
 }
 
+function rad_deg(rad) {
+  return rad / (Math.PI/180.0);
+}
 
+function merc_x(long) { // conversion longitude => x
+  var r_major = 6378137.000;
+  return r_major * deg_rad(long);
+}
+
+function merc_y(lat) { // conversion latitude => y
+  if (lat > 89.5) {
+      lat = 89.5;
+  }
+  if (lat < -89.5) {
+      lat = -89.5;
+  }
+  var r_major = 6378137.000;
+  var r_minor = 6356752.3142;
+  var temp = r_minor / r_major;
+  var es = 1.0 - (temp * temp);
+  var eccent = Math.sqrt(es);
+  var phi = deg_rad(lat);
+  var sinphi = Math.sin(phi);
+  var con = eccent * sinphi;
+  var com = 0.5 * eccent;
+  con = Math.pow((1.0-con)/(1.0+con), com);
+  var ts = Math.tan(.5 * (Math.PI*0.5 - phi))/con;
+  var y = 0 - r_major * Math.log(ts);
+  return y;
+}
+
+function merc(point) {
+  const lat = point.x;
+  const long = point.y;
+  return {x: merc_x(long), y: merc_y(lat)};
+}
+
+function mercToLatLong(point) //mercator to lat lon
+{
+  var x = point.x;
+  var y = point.y;
+  const r_major = 6378137.0;//Equatorial Radius, WGS84
+  const r_minor = 6356752.314245179;//defined as constant
+
+  var long = rad_deg(x / r_major);
+            
+  var temp = r_minor / r_major;
+  var e = Math.sqrt(1.0 - (temp * temp));
+  var lat = rad_deg(pj_phi2(Math.exp(0 - (y / r_major)), e));
+  
+  return {x: lat, y: long};
+}
+
+function pj_phi2(ts, e) 
+	{
+		var N_ITER = 15;
+		var HALFPI = Math.PI/2;
+		
+		
+		var TOL = 0.0000000001;
+		var eccnth, Phi, con, dphi;
+		var i;
+		var eccnth = .5 * e;
+		Phi = HALFPI - 2. * Math.atan (ts);
+		i = N_ITER;
+		do 
+		{
+			con = e * Math.sin (Phi);
+			dphi = HALFPI - 2. * Math.atan (ts * Math.pow((1. - con) / (1. + con), eccnth)) - Phi;
+			Phi += dphi;
+			
+		} while ( Math.abs(dphi) > TOL && --i);
+		return Phi;
+	}
+
+
+// score
+function increaseScore() {
+  score += round(polygonArea(hullPoints));
+}
+
+// fly to position
 function flyToPos() {
   myMap.map.flyTo({center: [long, lat], zoom: 18});
 }
