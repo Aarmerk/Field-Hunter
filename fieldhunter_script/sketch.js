@@ -1,6 +1,8 @@
 let canvas;
 let myFont;
-let buttonImg;
+var buttons = [];
+let buttonImgs = [];
+var curImg = 0;
 
 // API key for map provider.
 var key = 'pk.eyJ1Ijoic2ltdGluIiwiYSI6ImNraW5mODU2ajA4ZTUyem1sMGQ1MXRsYmYifQ.QiM3UZyf58-ehmisIRHQnw';
@@ -49,7 +51,10 @@ var theta;
 
 function preload() {
   myFont = loadFont('Ligconsolata-Regular.otf');
-  buttonImg = loadImage('../button/LocationZoom_unclicked.png')
+  buttonImgs[0] = loadImage('../button/LocationZoom_unclicked.png');
+  buttonImgs[1] = loadImage('../button/LocationZoom_unclicked_hover.png');
+  buttonImgs[2] = loadImage('../button/LocationZoom_clicked.png');
+  buttonImgs[3] = loadImage('../button/LocationZoom_clicked_hover.png');
 }
 
 function setup() {
@@ -115,18 +120,16 @@ function setupPosition(position) {
 }
 
 function setupGui() {
-    // Button für das Fixieren
-    button = createImg('../button/LocationZoom_clicked.png');
-    button.position(10, windowHeight - 60);
-    button.style('width: 30px');
-    button.mousePressed(flyToPos);
-    button.mouseOver(changeToBlue);
-
     // Eingebefeld für den namen
     pName = createInput();
     pName.position(20, 30);
     pName.style('width: 85px');
     pName.value(getItem('demoName')); // holt pNamen aus coookie
+
+  // Button für das Fixieren
+  for(var i = 0; i < buttonImgs.length; i++) {
+    buttons[i] = new Button(20, windowHeight - 70, 40, 40, buttonImgs[i]);
+  }
 }
 
 function positionChanged(position) {
@@ -321,6 +324,18 @@ function drawGui() {
     textSize(12);
     stroke(0);
     text(highscore, 20, 120);
+  }
+
+  // button
+  if(buttons[curImg].over()) {
+    if(mouseIsPressed) {
+      curImg = 2;
+      flyToPos();
+    } 
+    buttons[curImg + 1].display();
+  } else {
+    curImg = 0;
+    buttons[curImg].display();
   }
 }
 
@@ -539,16 +554,14 @@ function increaseScore() {
 
 // fly to position
 function flyToPos() {
+  if(myMap == null) {
+    return;
+  }
   if(!posOptions.enableHighAccuracy) {
     posOptions.enableHighAccuracy = true;
   }
   myMap.map.flyTo({center: [long, lat], zoom: 18});
 }
-
-function changeToBlue() {
-  
-}
-
 
 function gen_uid() {
   /*
@@ -577,4 +590,30 @@ function centerCanvas() {
 function windowResized() {
   // assigns new values for width and height variables
   centerCanvas();
+}
+
+
+class Button {
+  
+  constructor(inX, inY, inWidth, inHeight, inImg) {
+    this.x = inX;
+    this.y = inY;
+    this.img = inImg;
+    this.width = inWidth;
+    this.height = inHeight;
+  }
+  
+  display() {
+    image(this.img, this.x, this.y, this.width, this.height);
+  }
+  // over automatically matches the width & height of the image read from the file
+  // see this.img.width and this.img.height below
+  over() {
+    if (mouseX > this.x && mouseX < this.x + this.width && mouseY > this.y && mouseY < this.y + this.height) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
 }
