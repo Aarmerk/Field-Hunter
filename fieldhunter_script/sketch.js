@@ -83,8 +83,6 @@ function setup() {
   console.log('uid:' + uid);
   database = firebase.database();
 
-  getCurrentPosition(setupPosition, error, posOptions); // gps callback
-
   watchPosition(positionChanged, error, posOptions); // gps callback
 
   setupGui();
@@ -97,12 +95,10 @@ function setup() {
 
 function draw() {
   clear();
-  if(lat != -1) {
+  if(myMap != null) {
     drawPolygon();
     drawLine();
     drawPlayer();
-  } else {
-    getCurrentPosition(setupPosition, error, posOptions); // gps callback
   }
   drawGui();
 }
@@ -136,7 +132,7 @@ function setupGui() {
 }
 
 function positionChanged(position) {
-  if (map == null) {
+  if(myMap == null) {
     setupPosition(position);
     return;
   }
@@ -147,9 +143,6 @@ function positionChanged(position) {
     //if(coords[coords.length - 1].x != newCoord.x || coords[coords.length - 1].y != newCoord.y) {
       lat = position.latitude;
       long = position.longitude;
-      if(posOptions.enableHighAccuracy) {
-        posOptions.enableHighAccuracy = false;
-      }
       // Push if point doesn't cause intersection
       if(coords.length >= 3 && setLinesIntersect(newCoord)) {
         return;
@@ -164,7 +157,7 @@ function positionChanged(position) {
 }
 
 function error() {
-  // nop
+  //TODO
 }
 
 //Server functions
@@ -564,9 +557,6 @@ function increaseScore() {
 
 // fly to position
 function flyToPos() {
-  if(!posOptions.enableHighAccuracy) {
-    posOptions.enableHighAccuracy = true;
-  }
   myMap.map.flyTo({center: [long, lat], zoom: 18});
 }
 
