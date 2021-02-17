@@ -18,6 +18,11 @@ body {
   align-items: center;
 }
 
+main {
+  width: inherit;
+  height: inherit;
+}
+
 canvas {
   display: block;
 }

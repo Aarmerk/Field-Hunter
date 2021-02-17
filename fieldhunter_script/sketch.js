@@ -14,8 +14,6 @@ const version = "21";
 let myMap;
 let lat = -1; // wo bin ich
 let long = -1;
-let gameWidth = window.innerWidth;
-let gameHeight = window.innerHeight;
 
 // Map options
 const options = {
@@ -61,7 +59,7 @@ function preload() {
 
 function setup() {
   noCanvas();
-  canvas = createCanvas(gameWidth, gameHeight);
+  canvas = createCanvas(windowWidth, windowHeight);
   canvas.style('display', 'block');
   textFont(myFont, 20);
   textSize(20);
@@ -127,7 +125,7 @@ function setupGui() {
 
   // Button für das Fixieren
   for(var i = 0; i < buttonImgs.length; i++) {
-    buttons[i] = new Button(20, gameHeight - 70, 40, 40, buttonImgs[i]);
+    buttons[i] = new Button(windowWidth - 60, 20, 40, 40, buttonImgs[i]);
   }
 }
 
