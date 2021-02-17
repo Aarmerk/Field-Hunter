@@ -356,12 +356,17 @@ function sortRanking() {
 
 // Math functions
 
-function measure(point1, point2){  // generally used geo measurement function
+  /* Generally used geo measurement function between two LatLong points.
+     Returns distance in meters.
+
+    https://en.wikipedia.org/wiki/Haversine_formula
+  */
+function measure(point1, point2){  
   var R = 6378.137; // Radius of earth in KM
-  var dLat = point2.x * Math.PI / 180 - point1.x * Math.PI / 180;
-  var dLon = point2.y * Math.PI / 180 - point1.y * Math.PI / 180;
+  var dLat = deg_rad(point2.x) - deg_rad(point1.x);
+  var dLon = deg_rad(point2.y) - deg_rad(point1.y);
   var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-  Math.cos(point1.x * Math.PI / 180) * Math.cos(point2.x * Math.PI / 180) *
+  Math.cos(deg_rad(point1.x)) * Math.cos(deg_rad(point2.x)) *
   Math.sin(dLon/2) * Math.sin(dLon/2);
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   var d = R * c;
@@ -426,7 +431,8 @@ function getIntersectionPoint(a, b, c, d) {
 
 }
 
-// returns true if the line from p1->p2 intersects with q1->q2
+  /*  returns true if the line from p1->p2 intersects with q1->q2
+  */
 function intersects(p1, p2, q1, q2) {
   var det, gamma, lambda;
 
@@ -437,7 +443,7 @@ function intersects(p1, p2, q1, q2) {
   } else {
     lambda = ((q2.y - q1.y) * (q2.x - p1.x) + (q1.x - q2.x) * (q2.y - p1.y)) / det;
     gamma = ((p1.y - p2.y) * (q2.x - p1.x) + (p2.x - p1.x) * (q2.y - p1.y)) / det;
-    return ((-0.1 < lambda && lambda < 1.1) && (-0.1 < gamma && gamma < 1.1));
+    return ((-0.01 < lambda && lambda < 1.01) && (-0.01 < gamma && gamma < 1.01));
   }
 };
 
@@ -467,7 +473,11 @@ function polygonArea(polygon){
   return Math.abs(total);
 }
 
- //Mercator transformations
+
+
+ /* Mercator transformations 
+    https://wiki.openstreetmap.org/wiki/Mercator
+ */
 function deg_rad(ang) {
   return ang * (Math.PI/180.0)
 }
@@ -548,6 +558,8 @@ function pj_phi2(ts, e)
 	}
 
 
+
+
 // score
 function increaseScore() {
   score += round(polygonArea(hullPoints));
@@ -581,7 +593,7 @@ function gen_uid() {
   return uid;
 }
 
-
+// Class for Image Buttons
 class Button {
   
   constructor(inX, inY, inWidth, inHeight, inImg) {
