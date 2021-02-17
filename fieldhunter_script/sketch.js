@@ -101,6 +101,8 @@ function draw() {
     drawPolygon();
     drawLine();
     drawPlayer();
+  } else {
+    getCurrentPosition(setupPosition, error, posOptions); // gps callback
   }
   drawGui();
 }
@@ -134,7 +136,7 @@ function setupGui() {
 }
 
 function positionChanged(position) {
-  if (myMap == null) {
+  if (lat == -1) {
     setupPosition(position);
     return;
   }
@@ -329,13 +331,8 @@ function drawGui() {
 
   // button
   if(buttons[curImg].over()) {
-    if(mouseIsPressed) {
-      curImg = 2;
-      flyToPos();
-    } 
     buttons[curImg + 1].display();
   } else {
-    curImg = 0;
     buttons[curImg].display();
   }
 }
@@ -567,9 +564,6 @@ function increaseScore() {
 
 // fly to position
 function flyToPos() {
-  if(myMap == null) {
-    return;
-  }
   if(!posOptions.enableHighAccuracy) {
     posOptions.enableHighAccuracy = true;
   }
@@ -616,5 +610,11 @@ class Button {
       return false;
     }
   }
+}
 
+function mouseClicked() {
+  if(buttons[curImg].over()) {
+    curImg = 2;
+    flyToPos();
+  }
 }
