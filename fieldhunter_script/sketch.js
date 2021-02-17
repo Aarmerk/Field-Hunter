@@ -136,7 +136,7 @@ function setupGui() {
 }
 
 function positionChanged(position) {
-  if (lat == -1) {
+  if (map == null) {
     setupPosition(position);
     return;
   }
