@@ -133,6 +133,7 @@ function setupGui() {
 }
 
 function positionChanged(position) {
+  gpsOn = true;
   const newCoord = {x: position.latitude, y: position.longitude};
   if(coords.length > 0) {
     // Push if unique
@@ -252,15 +253,17 @@ function drawPlayer() {
   var mypos = myMap.latLngToPixel(lat, long);
   size = map(myMap.zoom(), 1, 6, 5, 7);
 
-  // Pulsing circle
-  var maxDiameter = pow(1.4, size);
-  var diam = (((size / 2) * 0.7 * theta) % maxDiameter) + size;
-  noStroke();
-  var playerColor = color(255, 0, 255);
-  playerColor.setAlpha(150 - (diam *  (150 / maxDiameter)));
-  fill(playerColor);
-  ellipse(mypos.x, mypos.y, diam, diam);
-  theta += (maxDiameter / 250);
+  if(gpsOn) {
+    // Pulsing circle
+    var maxDiameter = pow(1.4, size);
+    var diam = (((size / 2) * 0.7 * theta) % maxDiameter) + size;
+    noStroke();
+    var playerColor = color(255, 0, 255);
+    playerColor.setAlpha(150 - (diam *  (150 / maxDiameter)));
+    fill(playerColor);
+    ellipse(mypos.x, mypos.y, diam, diam);
+    theta += (maxDiameter / 250);
+  }
 
   //Player
   stroke(255);
