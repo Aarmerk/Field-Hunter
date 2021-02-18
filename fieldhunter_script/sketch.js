@@ -10,10 +10,11 @@ var key = 'pk.eyJ1Ijoic2ltdGluIiwiYSI6ImNraW5mODU2ajA4ZTUyem1sMGQ1MXRsYmYifQ.QiM
 // Create a new Mappa instance.
 var mappa = new Mappa('MapboxGL', key);
 const version = "21";
+let gpsOn = true;
 
 let myMap;
-let lat = -1; // wo bin ich
-let long = -1;
+let lat = -1.0; // wo bin ich
+let long = -1.0;
 
 // Map options
 const options = {
@@ -81,6 +82,13 @@ function setup() {
   console.log('uid:' + uid);
   database = firebase.database();
 
+  if(getItem('latitude') != undefined || getItem('longitude') != undefined) {
+    lat = parseFloat(getItem('latitude'));
+    long = parseFloat(getItem('longitude'));
+    setupMap();
+    coords.push({x: lat, y: long})
+  }
+
   watchPosition(positionChanged, error, posOptions); // gps callback
 
   setupGui();
@@ -102,18 +110,13 @@ function draw() {
 }
 
 
-// Position functions
+// Setup functions
 
-function setupPosition(position) {
-  lat = position.latitude;
-  long = position.longitude;
+function setupMap() {
   options.lat = lat;
   options.lng = long;
   myMap = mappa.tileMap(options); 
   myMap.overlay(canvas);
-  if (coords.length < 1) {
-    coords.push({x: lat, y: long});
-  }
 }
 
 function setupGui() {
@@ -121,7 +124,7 @@ function setupGui() {
     pName = createInput();
     pName.position(20, 30);
     pName.style('width: 85px');
-    pName.value(getItem('demoName')); // holt pNamen aus coookie
+    pName.value(getItem('playerName')); // holt pNamen aus coookie
 
   // Button für das Fixieren
   for(var i = 0; i < buttonImgs.length; i++) {
@@ -130,15 +133,10 @@ function setupGui() {
 }
 
 function positionChanged(position) {
-  if(myMap == null) {
-    setupPosition(position);
-    return;
-  }
   const newCoord = {x: position.latitude, y: position.longitude};
   if(coords.length > 0) {
     // Push if unique
     if(measure(coords[coords.length - 1], newCoord) > 1.0) {
-    //if(coords[coords.length - 1].x != newCoord.x || coords[coords.length - 1].y != newCoord.y) {
       lat = position.latitude;
       long = position.longitude;
       // Push if point doesn't cause intersection
@@ -151,11 +149,12 @@ function positionChanged(position) {
     lat = position.latitude;
     long = position.longitude;
     coords.push(newCoord);
+    setupMap();
   }
 }
 
 function error() {
-  //TODO
+  gpsOn = false;
 }
 
 //Server functions
@@ -197,7 +196,11 @@ function updateData() {
   updatePlayerData(); // meine daten updaten
   maintenancePlayerData(); // kill all zombies
   getAllPlayerData(); // alle anders player daten holen
-  storeItem('demoName', pName.value()); // meinen player namen im coookie speichern
+  storeItem('playerName', pName.value()); // meinen player namen im coookie speichern
+  if(lat > -1.0 && long > -1.0) {
+    storeItem('latitude', lat.toString()); // meinen player namen im coookie speichern
+    storeItem('longitude', long.toString()); // meinen player namen im coookie speichern
+  }
   sortRanking();
 }
 
@@ -603,6 +606,20 @@ class Button {
 function mouseClicked() {
   if(buttons[curImg].over()) {
     curImg = 2;
+    if(gpsOn == false) {
+      if(  navigator.userAgent.match(/Android/i)
+        || navigator.userAgent.match(/webOS/i)
+        || navigator.userAgent.match(/iPhone/i)
+        || navigator.userAgent.match(/iPad/i)
+        || navigator.userAgent.match(/iPod/i)
+        || navigator.userAgent.match(/BlackBerry/i)
+      ) {
+        watchPosition(positionChanged, error, posOptions);
+      } else {
+        location.reload();
+      }
+      return;
+    }
     flyToPos();
   }
 }
