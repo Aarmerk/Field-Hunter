@@ -44,7 +44,7 @@ let ranking = [];
 let coords = [];
 let hullPoints;
 var hullAlpha;
-var alphaAmount = 3;
+var alphaAmount = 1;
 var linesIntersect = false;
 
 // Pulsing Dot
@@ -86,7 +86,6 @@ function setup() {
     lat = parseFloat(getItem('latitude'));
     long = parseFloat(getItem('longitude'));
     setupMap();
-    coords.push({x: lat, y: long})
   }
 
   watchPosition(positionChanged, error, posOptions); // gps callback
@@ -133,8 +132,11 @@ function setupGui() {
 }
 
 function positionChanged(position) {
-  gpsOn = true;
+  if(!gpsOn) {
+    gpsOn = true;
+  }
   const newCoord = {x: position.latitude, y: position.longitude};
+  
   if(coords.length > 0) {
     // Push if unique
     if(measure(coords[coords.length - 1], newCoord) > 1.0) {
@@ -146,12 +148,20 @@ function positionChanged(position) {
       }
       coords.push(newCoord);
     }
-  } else {
+    curImg = 0;
+    return;
+  }
+  
+  if(lat != position.latitude || long != position.longitude) {
     lat = position.latitude;
     long = position.longitude;
-    coords.push(newCoord);
-    setupMap();
+    if(map == null) {
+      setupMap();
+    } else {
+      flyToPos();
+    }
   }
+  coords.push(newCoord);
 }
 
 function error() {
@@ -455,10 +465,10 @@ function polygonArea(polygon){
   var total = 0;
 
   for (var i = 0, l = polygon.length; i < l; i++) {
-    var addX = merc_x(polygon[i].x);
-    var addY = merc_y(polygon[i == polygon.length - 1 ? 0 : i + 1].y);
-    var subX = merc_x(polygon[i == polygon.length - 1 ? 0 : i + 1].x);
-    var subY = merc_y(polygon[i].y);
+    var addX = merc_x(polygon[i].y);
+    var addY = merc_y(polygon[i == polygon.length - 1 ? 0 : i + 1].x);
+    var subX = merc_x(polygon[i == polygon.length - 1 ? 0 : i + 1].y);
+    var subY = merc_y(polygon[i].x);
 
     total += (addX * addY * 0.5);
     total -= (subX * subY * 0.5);
@@ -556,12 +566,33 @@ function pj_phi2(ts, e)
 
 // score
 function increaseScore() {
+  fitToPolygon(hullPoints);
+  setTimeout(function() {flyToPos()}, 3000);
   score += round(polygonArea(hullPoints));
 }
 
 // fly to position
 function flyToPos() {
   myMap.map.flyTo({center: [long, lat], zoom: 18});
+}
+
+function fitToPolygon(polygon) {
+  polygon = toLongLatArray(polygon);
+  var bounds = polygon.reduce(function (bounds, coord) {
+    return bounds.extend(coord);
+  }, new mapboxgl.LngLatBounds(polygon[0], polygon[0]));
+  myMap.map.fitBounds(bounds, {
+    padding: 5,
+    duration: 500
+  });
+}
+
+function toLongLatArray(array) {
+  var temp = [];
+  for(var i = 0; i < array.length; i++) {
+    temp.push([array[i].y, array[i].x]);
+  }
+  return temp;
 }
 
 function gen_uid() {
