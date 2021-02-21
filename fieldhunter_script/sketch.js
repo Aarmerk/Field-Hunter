@@ -20,7 +20,7 @@ let long = -1.0;
 const options = {
   lat: lat, // center in bremen
   lng: long,
-  zoom: 16,
+  zoom: 18,
   //minZoom: 15,
   maxZoom: 22,
   style: 'mapbox://styles/simtin/ckl5nkoog2sf317qhmranwvs6',
@@ -155,7 +155,7 @@ function positionChanged(position) {
   if(lat != position.latitude || long != position.longitude) {
     lat = position.latitude;
     long = position.longitude;
-    if(map == null) {
+    if(map == undefined) {
       setupMap();
     } else {
       flyToPos();
@@ -367,10 +367,10 @@ function sortRanking() {
   */
 function measure(point1, point2){  
   var R = 6378.137; // Radius of earth in KM
-  var dLat = deg_rad(point2.x) - deg_rad(point1.x);
-  var dLon = deg_rad(point2.y) - deg_rad(point1.y);
+  var dLat = degToRad(point2.x) - degToRad(point1.x);
+  var dLon = degToRad(point2.y) - degToRad(point1.y);
   var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-  Math.cos(deg_rad(point1.x)) * Math.cos(deg_rad(point2.x)) *
+  Math.cos(degToRad(point1.x)) * Math.cos(degToRad(point2.x)) *
   Math.sin(dLon/2) * Math.sin(dLon/2);
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   var d = R * c;
@@ -474,25 +474,35 @@ function polygonArea(polygon){
     total -= (subX * subY * 0.5);
   }
 
-  return Math.abs(total);
+  return Math.abs(total / pow(getAverageScale(polygon), 2));
 }
 
+function degToRad(ang) {
+  return ang * (Math.PI/180.0)
+}
+
+function radToDeg(rad) {
+  return rad / (Math.PI/180.0);
+}
 
 
  /* Mercator transformations 
     https://wiki.openstreetmap.org/wiki/Mercator
  */
-function deg_rad(ang) {
-  return ang * (Math.PI/180.0)
-}
 
-function rad_deg(rad) {
-  return rad / (Math.PI/180.0);
+// Returns average scale factor from an array of points
+function getAverageScale(array) {
+  scaleFactor = 0.0;
+  for(var i = 0; i < array.length; i++) {
+    scaleFactor += array[i].x / array.length;
+  }
+  scaleFactor = 1 / Math.cos(degToRad(scaleFactor));
+  return scaleFactor;
 }
 
 function merc_x(long) { // conversion longitude => x
   var r_major = 6378137.000;
-  return r_major * deg_rad(long);
+  return r_major * degToRad(long);
 }
 
 function merc_y(lat) { // conversion latitude => y
@@ -507,7 +517,7 @@ function merc_y(lat) { // conversion latitude => y
   var temp = r_minor / r_major;
   var es = 1.0 - (temp * temp);
   var eccent = Math.sqrt(es);
-  var phi = deg_rad(lat);
+  var phi = degToRad(lat);
   var sinphi = Math.sin(phi);
   var con = eccent * sinphi;
   var com = 0.5 * eccent;
@@ -530,50 +540,47 @@ function mercToLatLong(point) //mercator to lat lon
   const r_major = 6378137.0;//Equatorial Radius, WGS84
   const r_minor = 6356752.314245179;//defined as constant
 
-  var long = rad_deg(x / r_major);
+  var long = radToDeg(x / r_major);
             
   var temp = r_minor / r_major;
   var e = Math.sqrt(1.0 - (temp * temp));
-  var lat = rad_deg(pj_phi2(Math.exp(0 - (y / r_major)), e));
+  var lat = radToDeg(pj_phi2(Math.exp(0 - (y / r_major)), e));
   
   return {x: lat, y: long};
 }
 
-function pj_phi2(ts, e) 
-	{
-		var N_ITER = 15;
-		var HALFPI = Math.PI/2;
-		
-		
-		var TOL = 0.0000000001;
-		var eccnth, Phi, con, dphi;
-		var i;
-		var eccnth = .5 * e;
-		Phi = HALFPI - 2. * Math.atan (ts);
-		i = N_ITER;
-		do 
-		{
-			con = e * Math.sin (Phi);
-			dphi = HALFPI - 2. * Math.atan (ts * Math.pow((1. - con) / (1. + con), eccnth)) - Phi;
-			Phi += dphi;
-			
-		} while ( Math.abs(dphi) > TOL && --i);
-		return Phi;
-	}
-
+function pj_phi2(ts, e) {
+  var N_ITER = 15;
+  var HALFPI = Math.PI/2;
+  var TOL = 0.0000000001;
+  var eccnth, Phi, con, dphi;
+  var i;
+  var eccnth = .5 * e;
+  Phi = HALFPI - 2. * Math.atan (ts);
+  i = N_ITER;
+  do {
+    con = e * Math.sin (Phi);
+    dphi = HALFPI - 2. * Math.atan (ts * Math.pow((1. - con) / (1. + con), eccnth)) - Phi;
+    Phi += dphi;
+    
+  } while ( Math.abs(dphi) > TOL && --i);
+  return Phi;
+}
 
 
 
 // score
 function increaseScore() {
+  disableMapInteraction();
   fitToPolygon(hullPoints);
   setTimeout(function() {flyToPos()}, 3000);
   score += round(polygonArea(hullPoints));
+  setTimeout(function() {enableMapInteraction()}, 6000);
 }
 
 // fly to position
 function flyToPos() {
-  myMap.map.flyTo({center: [long, lat], zoom: 18});
+  myMap.map.flyTo({center: [long, lat], zoom: 18, duration: 3000});
 }
 
 function fitToPolygon(polygon) {
@@ -641,19 +648,31 @@ function mouseClicked() {
   if(buttons[curImg].over()) {
     curImg = 2;
     if(gpsOn == false) {
-      if(  navigator.userAgent.match(/Android/i)
-        || navigator.userAgent.match(/webOS/i)
-        || navigator.userAgent.match(/iPhone/i)
-        || navigator.userAgent.match(/iPad/i)
-        || navigator.userAgent.match(/iPod/i)
-        || navigator.userAgent.match(/BlackBerry/i)
-      ) {
-        watchPosition(positionChanged, error, posOptions);
-      } else {
-        location.reload();
-      }
+      location.reload();
       return;
     }
     flyToPos();
   }
+}
+
+function disableMapInteraction() {
+  myMap.map.boxZoom.disable();
+  myMap.map.scrollZoom.disable();
+  myMap.map.dragPan.disable();
+  myMap.map.dragRotate.disable();
+  myMap.map.keyboard.disable();
+  myMap.map.doubleClickZoom.disable();
+  myMap.map.touchZoomRotate.disable();
+  myMap.map.touchPitch.disable();
+}
+
+function enableMapInteraction() {
+  myMap.map.boxZoom.enable();
+  myMap.map.scrollZoom.enable();
+  myMap.map.dragPan.enable();
+  myMap.map.dragRotate.enable();
+  myMap.map.keyboard.enable();
+  myMap.map.doubleClickZoom.enable();
+  myMap.map.touchZoomRotate.enable();
+  myMap.map.touchPitch.enable();
 }
