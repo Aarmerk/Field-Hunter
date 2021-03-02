@@ -1,10 +1,9 @@
 let canvas;
 let myFont;
-var buttons = [];
+var camButton;
 let buttonImgs = [];
 let showScore = false;
 let scoreButton;
-var curImg = 0;
 
 // API key for map provider.
 var key = 'pk.eyJ1Ijoic2ltdGluIiwiYSI6ImNraW5mODU2ajA4ZTUyem1sMGQ1MXRsYmYifQ.QiM3UZyf58-ehmisIRHQnw';
@@ -29,9 +28,18 @@ const options = {
   pitch: 0,
 };
 
+// Camera modes
+var CameraMode = {
+  FREE: 1,
+  PLAYER: 2,
+  POLYGON: 3,
+};
+
 // Position options
 var posOptions = {
-  enableHighAccuracy: true
+  enableHighAccuracy: true,
+  timeout: 50000, 
+  maximumAge: 0
 }
 
 // Database
@@ -121,29 +129,25 @@ function setupMap() {
 }
 
 function setupGui() {
-    // Eingebefeld für den namen
-    pName = createInput();
-    pName.position(20, 30);
-    pName.style('width: 85px');
-    pName.value(getItem('playerName')); // holt pNamen aus coookie
+  // Eingebefeld für den namen
+  pName = createInput();
+  pName.position(20, 30);
+  pName.style('width: 85px');
+  pName.value(getItem('playerName')); // holt pNamen aus coookie
 
-  // Button für das Fixieren
-  for(var i = 0; i < buttonImgs.length; i++) {
-    buttons[i] = new Button(windowWidth - 60, 20, 40, 40, buttonImgs[i]);
-  }
+  camButton = new Button(windowWidth - 60, 20, 40, 40, buttonImgs);
 
   scoreButton = createButton('Show Ranking');
-  scoreButton.position(windowWidth -105, 80);
+  scoreButton.position(20, 80);
   scoreButton.mousePressed(scoreButtonPress);
-
 }
 
 function scoreButtonPress(){
- if(showScore==false){
-    showScore = true;
-} else {
-  showScore = false;
-}
+  if(!showScore){
+     showScore = true;
+   } else {
+   showScore = false;
+  }
 }
 
 function positionChanged(position) {
@@ -163,7 +167,6 @@ function positionChanged(position) {
       }
       coords.push(newCoord);
     }
-    curImg = 0;
     return;
   }
   
@@ -337,9 +340,9 @@ function drawGui() {
   textAlign(LEFT);
   textStyle(BOLD);
   stroke(0);
-  fill(255, 0, 255);
-  text(info, 20, 75);
-  pop();
+  fill(255, 255, 255);
+  text(info, windowWidth / 2 - 20, 30);
+
   if (showScore == true) {
     if (players != null) {
       var highscore = "";
@@ -350,13 +353,11 @@ function drawGui() {
       fill(0, 255, 255);
       textSize(20)
       stroke(0);
-      text("Rankings:", windowWidth - 105, 125);
-
+      text("Rankings:", 20, 125);
       fill(255, 255, 0);
       textSize(12);
-      stroke(0);
-      text(highscore, windowWidth - 105, 145);
-
+      text(highscore, 20, 145);
+      
       for(var j = 0; j < ranking.length; j++)
       {
         if(ranking[j].uid == uid)
@@ -371,16 +372,12 @@ function drawGui() {
       fill(255, 0, 255);
       textSize(12);
       stroke(0);
-      text(playerRanking, windowWidth -105, 210);
+      text(playerRanking, 30, 210);
     }
   }
 
-  // button
-  if(buttons[curImg].over()) {
-    buttons[curImg + 1].display();
-  } else {
-    buttons[curImg].display();
-  }
+  camButton.display();
+  pop();
 }
 
 function sortRanking() {
@@ -423,6 +420,8 @@ function setLinesIntersect(newPoint) {
   // Intersects if new point near first point
   if(Math.abs(coords[0].x - newPoint.x) < 1e-6 && Math.abs(coords[0].y - newPoint.y) < 1e-6) {
     linesIntersect = true;
+    hullPoints = [];
+    hullAlpha = 200;
     hullPoints = [...coords];
     coords = [];
     increaseScore();
@@ -661,16 +660,28 @@ function gen_uid() {
 // Class for Image Buttons
 class Button {
   
-  constructor(inX, inY, inWidth, inHeight, inImg) {
+  imgArr = [];
+
+  constructor(inX, inY, inWidth, inHeight, inImgArr) {
     this.x = inX;
     this.y = inY;
-    this.img = inImg;
     this.width = inWidth;
     this.height = inHeight;
+    this.imgArr = inImgArr;
+    this.curImg = 0;
   }
   
   display() {
-    image(this.img, this.x, this.y, this.width, this.height);
+    image(this.imgArr[this.curImg], this.x, this.y, this.width, this.height);
+  }
+
+  nextImage(){
+    this.curImg = (this.curImg + 1) % this.imgArr.length;
+  }
+
+  changeButton(inImgArr) {
+    this.imgArr = inImgArr;
+    this.curImg = 0;
   }
   // over automatically matches the width & height of the image read from the file
   // see this.img.width and this.img.height below
@@ -683,14 +694,16 @@ class Button {
   }
 }
 
-function mouseClicked() {
-  if(buttons[curImg].over()) {
-    curImg = 2;
-    if(gpsOn == false) {
-      location.reload();
-      return;
-    }
+function mousePressed() {
+  if(camButton.over()) {
+    camButton.nextImage();
     flyToPos();
+  }
+}
+
+function mouseReleased() {
+  if(camButton.over()) {
+    camButton.nextImage();
   }
 }
 
