@@ -2,6 +2,8 @@ let canvas;
 let myFont;
 var buttons = [];
 let buttonImgs = [];
+let showScore = false;
+let scoreButton;
 var curImg = 0;
 
 // API key for map provider.
@@ -129,6 +131,19 @@ function setupGui() {
   for(var i = 0; i < buttonImgs.length; i++) {
     buttons[i] = new Button(windowWidth - 60, 20, 40, 40, buttonImgs[i]);
   }
+
+  scoreButton = createButton('Show Ranking');
+  scoreButton.position(windowWidth -105, 80);
+  scoreButton.mousePressed(scoreButtonPress);
+
+}
+
+function scoreButtonPress(){
+ if(showScore==false){
+    showScore = true;
+} else {
+  showScore = false;
+}
 }
 
 function positionChanged(position) {
@@ -199,7 +214,8 @@ function updatePlayerData() {
     long: long,
     name: pName.value(),
     score: score,
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    uid: uid
   });
 }
 
@@ -285,6 +301,11 @@ function drawPlayer() {
   fill(255, 0, 255);
   text(pName.value(), mypos.x + 20, mypos.y);
 
+  //Player score
+  noStroke();
+  fill(0, 255, 255);
+  text(score, mypos.x + 30, mypos.y +18);
+
   if (players != null) {
     var keys = Object.keys(players);
     for (var i = 0; i < keys.length; i++) {
@@ -319,21 +340,39 @@ function drawGui() {
   fill(255, 0, 255);
   text(info, 20, 75);
   pop();
-  if (players != null){
-    var highscore = "";
-    scoreLenght = ranking.length < 5 ? ranking.length : 5;
-    for (var i = 0; i < scoreLenght; i++) {
-      highscore += ranking[i].name + ": " + ranking[i].score + "\n";
-    }
-    fill(0,255,255);
-    textSize(20)
-    stroke(0);
-    text("Rankings:", 20, 100);
+  if (showScore == true) {
+    if (players != null) {
+      var highscore = "";
+      scoreLenght = ranking.length < 5 ? ranking.length : 5;
+      for (var i = 0; i < scoreLenght; i++) {
+        highscore += i+1 + ". " + ranking[i].name + ": " + ranking[i].score + "\n";
+      }
+      fill(0, 255, 255);
+      textSize(20)
+      stroke(0);
+      text("Rankings:", windowWidth - 105, 125);
 
-    fill(255,255,0);
-    textSize(12);
-    stroke(0);
-    text(highscore, 20, 120);
+      fill(255, 255, 0);
+      textSize(12);
+      stroke(0);
+      text(highscore, windowWidth - 105, 145);
+
+      for(var j = 0; j < ranking.length; j++)
+      {
+        if(ranking[j].uid == uid)
+        {
+          if(j>5){
+          var playerRanking = "";
+          playerRanking = j+1 + ". " + ranking[j].name + ": " + ranking[j].score + "\n";
+          }
+        }
+      }
+
+      fill(255, 0, 255);
+      textSize(12);
+      stroke(0);
+      text(playerRanking, windowWidth -105, 210);
+    }
   }
 
   // button
