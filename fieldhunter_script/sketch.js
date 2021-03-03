@@ -14,7 +14,7 @@ const CameraMode = Object.freeze({
 let camMode = CameraMode.FREE;
 
 let showScore = false;
-const scoreButton;
+let scoreButton;
 let scoreImgs = [];
 
 // API key for map provider.
@@ -22,7 +22,6 @@ var key = 'pk.eyJ1Ijoic2ltdGluIiwiYSI6ImNraW5mODU2ajA4ZTUyem1sMGQ1MXRsYmYifQ.QiM
 
 // Create a new Mappa instance.
 var mappa = new Mappa('MapboxGL', key);
-const version = "21";
 let gpsOn = true;
 
 let myMap;
@@ -148,7 +147,7 @@ function setupGui() {
 
   camButton = new Button(windowWidth - 60, 20, 50, 57, camFreeImgs);
 
-  camButton = new Button(20, 80, 50, 57, scoreImgs);
+  scoreButton = new Button(20, 52, 53, 57, scoreImgs);
 }
 
 function positionChanged(position) {
@@ -353,8 +352,8 @@ function drawGui() {
   if (showScore == true) {
     fill("rgba(0, 215, 249, 0.7)");
     stroke(255);
-    strokeWeight(3);
-    rect(22, 108, 170, 170);
+    strokeWeight(5);
+    rect(23, 107, 170, 120);
     if (players != null) {
       var highscore = "";
       scoreLenght = ranking.length < 5 ? ranking.length : 5;
@@ -364,9 +363,9 @@ function drawGui() {
       fill(255, 255, 255);
       textSize(20);
       noStroke();
-      text("Rankings:", 25, 125);
-      textSize(14);
-      text(highscore, 25, 145);
+      text("Rankings:", 27, 125);
+      textSize(12);
+      text(highscore, 27, 140);
       
       for(var j = 0; j < ranking.length; j++)
       {
@@ -384,6 +383,7 @@ function drawGui() {
     }
   }
   camButton.display();
+  scoreButton.display();
   pop();
 }
 
