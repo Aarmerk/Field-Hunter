@@ -14,7 +14,8 @@ const CameraMode = Object.freeze({
 let camMode = CameraMode.FREE;
 
 let showScore = false;
-let scoreButton;
+const scoreButton;
+let scoreImgs = [];
 
 // API key for map provider.
 var key = 'pk.eyJ1Ijoic2ltdGluIiwiYSI6ImNraW5mODU2ajA4ZTUyem1sMGQ1MXRsYmYifQ.QiM3UZyf58-ehmisIRHQnw';
@@ -66,12 +67,16 @@ var theta;
 
 function preload() {
   myFont = loadFont('Ligconsolata-Regular.otf');
+
   camFreeImgs[0] = loadImage('../cambutton/Camera1.png');
   camFreeImgs[1] = loadImage('../cambutton/Camera1_clicked.png');
   camPlayerImgs[0] = loadImage('../cambutton/Camera2.png');
   camPlayerImgs[1] = loadImage('../cambutton/Camera2_clicked.png');
   camPolygonImgs[0] = loadImage('../cambutton/Camera3.png');
   camPolygonImgs[1] = loadImage('../cambutton/Camera3_clicked.png');
+
+  scoreImgs[0] = loadImage('../scorebutton/rankingUp.png');
+  scoreImgs[1] = loadImage('../scorebutton/rankingDown.png');
 }
 
 function setup() {
@@ -141,19 +146,9 @@ function setupGui() {
   pName.style('width: 85px');
   pName.value(getItem('playerName')); // holt pNamen aus coookie
 
-  camButton = new Button(windowWidth - 60, 20, 50, 55, camFreeImgs);
+  camButton = new Button(windowWidth - 60, 20, 50, 57, camFreeImgs);
 
-  scoreButton = createButton('Show Ranking');
-  scoreButton.position(20, 80);
-  scoreButton.mousePressed(scoreButtonPress);
-}
-
-function scoreButtonPress(){
-  if(!showScore){
-     showScore = true;
-   } else {
-   showScore = false;
-  }
+  camButton = new Button(20, 80, 50, 57, scoreImgs);
 }
 
 function positionChanged(position) {
@@ -171,12 +166,12 @@ function positionChanged(position) {
       if(coords.length >= 3 && setLinesIntersect(newCoord)) {
         return;
       }
+      coords.push(newCoord);
       if(camMode == CameraMode.PLAYER) {
         flyToPos();
       } else if (camMode == CameraMode.POLYGON) {
         fitToPolygon();
       }
-      coords.push(newCoord);
     }
     return;
   }
@@ -346,7 +341,7 @@ function drawPlayer() {
 
 function drawGui() {
   push();
-  var info = "Score = " + score;
+  var info = "Score: " + score;
   textSize(20);
   textAlign(CENTER);
   textStyle(BOLD);
@@ -356,7 +351,7 @@ function drawGui() {
   textAlign(LEFT);
 
   if (showScore == true) {
-    fill("rgba(0, 215, 249, 1)");
+    fill("rgba(0, 215, 249, 0.7)");
     stroke(255);
     strokeWeight(3);
     rect(22, 108, 170, 170);
@@ -364,7 +359,7 @@ function drawGui() {
       var highscore = "";
       scoreLenght = ranking.length < 5 ? ranking.length : 5;
       for (var i = 0; i < scoreLenght; i++) {
-        highscore += i+1 + "." + ranking[i].name + ": " + ranking[i].score + "\n";
+        highscore += i+1 + "." + ranking[i].name + ":" + ranking[i].score + "\n";
       }
       fill(255, 255, 255);
       textSize(20);
@@ -377,7 +372,7 @@ function drawGui() {
       {
         if(ranking[j].uid == uid)
         {
-          if(j>5){
+          if(j > 5) {
           var playerRanking = "";
           playerRanking = j+1 + "." + ranking[j].name + ": " + ranking[j].score + "\n";
           }
@@ -388,7 +383,6 @@ function drawGui() {
       text(playerRanking, 30, 210);
     }
   }
-
   camButton.display();
   pop();
 }
@@ -626,7 +620,9 @@ function increaseScore() {
   fitToPolygon(hullPoints);
   setTimeout(function() {flyToPos()}, 3000);
   score += round(polygonArea(hullPoints));
-  setTimeout(function() {enableMapInteraction()}, 6000);
+  if(camMode = CameraMode.FREE) {
+    setTimeout(function() {enableMapInteraction()}, 6000);
+  }
 }
 
 // fly to position
@@ -710,6 +706,9 @@ class Button {
 function mousePressed() {
   if(camButton.over()) {
     camButton.nextImage();
+  } else if (scoreButton.over()) {
+    scoreButton.nextImage();
+    showScore = !showScore;
   }
 }
 
@@ -720,16 +719,17 @@ function mouseReleased() {
         flyToPos();
         disableMapInteraction();
         camMode = CameraMode.PLAYER;
-        camButton = new Button(windowWidth - 60, 20, 50, 55, camPlayerImgs);
+        camButton = new Button(windowWidth - 60, 20, 50, 57, camPlayerImgs);
         break;
       case CameraMode.PLAYER:
+        disableMapInteraction();
         fitToPolygon(coords);
         camMode = CameraMode.POLYGON;
-        camButton = new Button(windowWidth - 60, 20, 50, 55, camPolygonImgs);
+        camButton = new Button(windowWidth - 60, 20, 50, 57, camPolygonImgs);
         break;
       default:
         enableMapInteraction();
-        camButton = new Button(windowWidth - 60, 20, 50, 55, camFreeImgs);
+        camButton = new Button(windowWidth - 60, 20, 50, 57, camFreeImgs);
         camMode = CameraMode.FREE;
     }
   }
