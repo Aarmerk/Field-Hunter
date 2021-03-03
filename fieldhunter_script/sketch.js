@@ -1,7 +1,18 @@
 let canvas;
 let myFont;
+
 var camButton;
-let buttonImgs = [];
+let camFreeImgs = [];
+let camPlayerImgs = [];
+let camPolygonImgs = [];
+// Camera modes
+const CameraMode = Object.freeze({
+  FREE: 1,
+  PLAYER: 2,
+  POLYGON: 3,
+});
+let camMode = CameraMode.FREE;
+
 let showScore = false;
 let scoreButton;
 
@@ -26,13 +37,6 @@ const options = {
   maxZoom: 22,
   style: 'mapbox://styles/simtin/ckl5nkoog2sf317qhmranwvs6',
   pitch: 0,
-};
-
-// Camera modes
-var CameraMode = {
-  FREE: 1,
-  PLAYER: 2,
-  POLYGON: 3,
 };
 
 // Position options
@@ -62,10 +66,12 @@ var theta;
 
 function preload() {
   myFont = loadFont('Ligconsolata-Regular.otf');
-  buttonImgs[0] = loadImage('../button/LocationZoom_unclicked.png');
-  buttonImgs[1] = loadImage('../button/LocationZoom_unclicked_hover.png');
-  buttonImgs[2] = loadImage('../button/LocationZoom_clicked.png');
-  buttonImgs[3] = loadImage('../button/LocationZoom_clicked_hover.png');
+  camFreeImgs[0] = loadImage('../cambutton/Camera1.png');
+  camFreeImgs[1] = loadImage('../cambutton/Camera1_clicked.png');
+  camPlayerImgs[0] = loadImage('../cambutton/Camera2.png');
+  camPlayerImgs[1] = loadImage('../cambutton/Camera2_clicked.png');
+  camPolygonImgs[0] = loadImage('../cambutton/Camera3.png');
+  camPolygonImgs[1] = loadImage('../cambutton/Camera3_clicked.png');
 }
 
 function setup() {
@@ -135,7 +141,7 @@ function setupGui() {
   pName.style('width: 85px');
   pName.value(getItem('playerName')); // holt pNamen aus coookie
 
-  camButton = new Button(windowWidth - 60, 20, 40, 40, buttonImgs);
+  camButton = new Button(windowWidth - 60, 20, 50, 55, camFreeImgs);
 
   scoreButton = createButton('Show Ranking');
   scoreButton.position(20, 80);
@@ -164,6 +170,11 @@ function positionChanged(position) {
       // Push if point doesn't cause intersection
       if(coords.length >= 3 && setLinesIntersect(newCoord)) {
         return;
+      }
+      if(camMode == CameraMode.PLAYER) {
+        flyToPos();
+      } else if (camMode == CameraMode.POLYGON) {
+        fitToPolygon();
       }
       coords.push(newCoord);
     }
@@ -307,7 +318,7 @@ function drawPlayer() {
   //Player score
   noStroke();
   fill(0, 255, 255);
-  text(score, mypos.x + 30, mypos.y +18);
+  text(score, mypos.x + 20, mypos.y + 18);
 
   if (players != null) {
     var keys = Object.keys(players);
@@ -337,11 +348,11 @@ function drawGui() {
   push();
   var info = "Score = " + score;
   textSize(20);
-  textAlign(LEFT);
+  textAlign(CENTER);
   textStyle(BOLD);
   stroke(0);
   fill(255, 255, 255);
-  text(info, windowWidth / 2 - 20, 30);
+  text(info, windowWidth / 2, 30);
 
   if (showScore == true) {
     if (players != null) {
@@ -697,13 +708,28 @@ class Button {
 function mousePressed() {
   if(camButton.over()) {
     camButton.nextImage();
-    flyToPos();
   }
 }
 
 function mouseReleased() {
   if(camButton.over()) {
-    camButton.nextImage();
+    switch(camMode) {
+      case CameraMode.FREE:
+        flyToPos();
+        disableMapInteraction();
+        camMode = CameraMode.PLAYER;
+        camButton = new Button(windowWidth - 60, 20, 50, 55, camPlayerImgs);
+        break;
+      case CameraMode.PLAYER:
+        fitToPolygon(coords);
+        camMode = CameraMode.POLYGON;
+        camButton = new Button(windowWidth - 60, 20, 50, 55, camPolygonImgs);
+        break;
+      default:
+        enableMapInteraction();
+        camButton = new Button(windowWidth - 60, 20, 50, 55, camFreeImgs);
+        camMode = CameraMode.FREE;
+    }
   }
 }
 
