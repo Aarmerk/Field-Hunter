@@ -353,21 +353,25 @@ function drawGui() {
   stroke(0);
   fill(255, 255, 255);
   text(info, windowWidth / 2, 30);
+  textAlign(LEFT);
 
   if (showScore == true) {
+    fill("rgba(0, 215, 249, 1)");
+    stroke(255);
+    strokeWeight(3);
+    rect(22, 108, 170, 170);
     if (players != null) {
       var highscore = "";
       scoreLenght = ranking.length < 5 ? ranking.length : 5;
       for (var i = 0; i < scoreLenght; i++) {
-        highscore += i+1 + ". " + ranking[i].name + ": " + ranking[i].score + "\n";
+        highscore += i+1 + "." + ranking[i].name + ": " + ranking[i].score + "\n";
       }
-      fill(0, 255, 255);
-      textSize(20)
-      stroke(0);
-      text("Rankings:", 20, 125);
-      fill(255, 255, 0);
-      textSize(12);
-      text(highscore, 20, 145);
+      fill(255, 255, 255);
+      textSize(20);
+      noStroke();
+      text("Rankings:", 25, 125);
+      textSize(14);
+      text(highscore, 25, 145);
       
       for(var j = 0; j < ranking.length; j++)
       {
@@ -375,14 +379,12 @@ function drawGui() {
         {
           if(j>5){
           var playerRanking = "";
-          playerRanking = j+1 + ". " + ranking[j].name + ": " + ranking[j].score + "\n";
+          playerRanking = j+1 + "." + ranking[j].name + ": " + ranking[j].score + "\n";
           }
         }
       }
 
-      fill(255, 0, 255);
-      textSize(12);
-      stroke(0);
+      textSize(14);
       text(playerRanking, 30, 210);
     }
   }
