@@ -79,7 +79,6 @@ function preload() {
 }
 
 function setup() {
-  noCanvas();
   canvas = createCanvas(windowWidth, windowHeight);
   canvas.style('display', 'block');
   textFont(myFont, 20);
@@ -129,69 +128,8 @@ function draw() {
 }
 
 
-// Setup functions
 
-function setupMap() {
-  options.lat = lat;
-  options.lng = long;
-  myMap = mappa.tileMap(options); 
-  myMap.overlay(canvas);
-}
-
-function setupGui() {
-  // Eingebefeld für den namen
-  pName = createInput();
-  pName.position(20, 30);
-  pName.style('width: 85px');
-  pName.value(getItem('playerName')); // holt pNamen aus coookie
-
-  camButton = new Button(windowWidth - 60, 20, 50, 57, camFreeImgs);
-
-  scoreButton = new Button(20, 52, 53, 57, scoreImgs);
-}
-
-function positionChanged(position) {
-  if(!gpsOn) {
-    gpsOn = true;
-  }
-  const newCoord = {x: position.latitude, y: position.longitude};
-  
-  if(coords.length > 0) {
-    // Push if unique
-    if(measure(coords[coords.length - 1], newCoord) > 1.0) {
-      lat = position.latitude;
-      long = position.longitude;
-      // Push if point doesn't cause intersection
-      if(coords.length >= 3 && setLinesIntersect(newCoord)) {
-        return;
-      }
-      coords.push(newCoord);
-      if(camMode == CameraMode.PLAYER) {
-        flyToPos();
-      } else if (camMode == CameraMode.POLYGON) {
-        fitToPolygon();
-      }
-    }
-    return;
-  }
-  
-  if(lat != position.latitude || long != position.longitude) {
-    lat = position.latitude;
-    long = position.longitude;
-    if(map == undefined) {
-      setupMap();
-    } else {
-      flyToPos();
-    }
-  }
-  coords.push(newCoord);
-}
-
-function error() {
-  gpsOn = false;
-}
-
-//Server functions
+// Database functions //////////////////////////////////////////////////////////////////////////////////////
 
 function maintenancePlayerData() {
   var ref = firebase.database().ref('player');
@@ -239,8 +177,78 @@ function updateData() {
   sortRanking();
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Draw functions
+
+
+// Setup functions //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function setupMap() {
+  options.lat = lat;
+  options.lng = long;
+  myMap = mappa.tileMap(options); 
+  myMap.overlay(canvas);
+}
+
+function setupGui() {
+  // Eingebefeld für den namen
+  pName = createInput();
+  pName.position(windowWidth / 2 - 43, 30);
+  pName.style('width: 85px');
+  pName.value(getItem('playerName')); // holt pNamen aus coookie
+
+  camButton = new Button(windowWidth - 60, 20, 50, 57, camFreeImgs);
+
+  scoreButton = new Button(20, 20, 53, 57, scoreImgs);
+}
+
+function positionChanged(position) {
+  if(!gpsOn) {
+    gpsOn = true;
+  }
+  const newCoord = {x: position.latitude, y: position.longitude};
+  
+  if(coords.length > 0) {
+    // Push if unique
+    if(measure(coords[coords.length - 1], newCoord) > 1.0) {
+      lat = position.latitude;
+      long = position.longitude;
+      // Push if point doesn't cause intersection
+      if(coords.length >= 3 && setLinesIntersect(newCoord)) {
+        return;
+      }
+      coords.push(newCoord);
+      if(camMode == CameraMode.PLAYER) {
+        flyToPos();
+      } else if (camMode == CameraMode.POLYGON) {
+        fitToPolygon();
+      }
+    }
+    return;
+  }
+  
+  if(lat != position.latitude || long != position.longitude) {
+    lat = position.latitude;
+    long = position.longitude;
+    if(map == undefined) {
+      setupMap();
+    } else {
+      flyToPos();
+    }
+    myMap.map.doubleClickZoom.disable();
+  }
+  coords.push(newCoord);
+}
+
+function error() {
+  gpsOn = false;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+// Draw functions /////////////////////////////////////////////////////////////////////////////////////////////////
 
 function drawPolygon(){
   push();
@@ -346,7 +354,7 @@ function drawGui() {
   textStyle(BOLD);
   stroke(0);
   fill(255, 255, 255);
-  text(info, windowWidth / 2, 30);
+  text(info, windowWidth / 2, windowHeight - 20);
   textAlign(LEFT);
 
   if (showScore == true) {
@@ -354,38 +362,37 @@ function drawGui() {
     stroke(255);
     strokeWeight(5);
     rect(23, 107, 170, 120);
+
     if (players != null) {
       var highscore = "";
+
       scoreLenght = ranking.length < 5 ? ranking.length : 5;
       for (var i = 0; i < scoreLenght; i++) {
         highscore += i+1 + "." + ranking[i].name + ":" + ranking[i].score + "\n";
       }
+
+      let selfRanking = ranking.findIndex((element) => element.uid == uid) + 1;
+      if(selfRanking > 5) {
+        highscore += selfRanking + "." + pName.value() + ":" + score;
+      }
+
       fill(255, 255, 255);
       textSize(20);
       noStroke();
       text("Rankings:", 27, 125);
       textSize(12);
       text(highscore, 27, 140);
-      
-      for(var j = 0; j < ranking.length; j++)
-      {
-        if(ranking[j].uid == uid)
-        {
-          if(j > 5) {
-          var playerRanking = "";
-          playerRanking = j+1 + "." + ranking[j].name + ": " + ranking[j].score + "\n";
-          }
-        }
-      }
-
-      textSize(14);
-      text(playerRanking, 30, 210);
     }
   }
+
   camButton.display();
   scoreButton.display();
   pop();
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 function sortRanking() {
   if(players == null) {
@@ -400,8 +407,21 @@ function sortRanking() {
   ranking.sort((a,b) => b.score - a.score);
 }
 
+// score
+function increaseScore() {
+  disableMapInteraction();
+  fitToPolygon(hullPoints);
+  setTimeout(function() {flyToPos()}, 3000);
+  score += round(polygonArea(hullPoints));
+  if(camMode = CameraMode.FREE) {
+    setTimeout(function() {enableMapInteraction()}, 6000);
+  }
+}
 
-// Math functions
+
+
+
+// Math functions ////////////////////////////////////////////////////////////////////////////////////////////
 
   /* Generally used geo measurement function between two LatLong points.
      Returns distance in meters.
@@ -613,23 +633,16 @@ function pj_phi2(ts, e) {
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// score
-function increaseScore() {
-  disableMapInteraction();
-  fitToPolygon(hullPoints);
-  setTimeout(function() {flyToPos()}, 3000);
-  score += round(polygonArea(hullPoints));
-  if(camMode = CameraMode.FREE) {
-    setTimeout(function() {enableMapInteraction()}, 6000);
-  }
-}
+
 
 // fly to position
 function flyToPos() {
   myMap.map.flyTo({center: [long, lat], zoom: 18, duration: 3000});
 }
 
+// fit view to polygon
 function fitToPolygon(polygon) {
   polygon = toLongLatArray(polygon);
   var bounds = polygon.reduce(function (bounds, coord) {
@@ -641,6 +654,7 @@ function fitToPolygon(polygon) {
   });
 }
 
+// converts array to LongLat array for MapboxGl functions
 function toLongLatArray(array) {
   var temp = [];
   for(var i = 0; i < array.length; i++) {
@@ -649,22 +663,10 @@ function toLongLatArray(array) {
   return temp;
 }
 
-function gen_uid() {
-  /*
-   erzeuge eine user id anhänig von bildschirmaufläsung; browser id, etc....
-   https://pixelprivacy.com/resources/browser-fingerprinting/
-   https://en.wikipedia.org/wiki/Device_fingerprint
-  */
-  var navigator_info = window.navigator;
-  var screen_info = window.screen;
-  var uid = navigator_info.mimeTypes.length;
-  uid += navigator_info.userAgent.replace(/\D+/g, '');
-  uid += navigator_info.plugins.length;
-  uid += screen_info.height || '';
-  uid += screen_info.width || '';
-  uid += screen_info.pixelDepth || '';
-  return uid;
-}
+
+
+
+// Buttons /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Class for Image Buttons
 class Button {
@@ -684,8 +686,25 @@ class Button {
     image(this.imgArr[this.curImg], this.x, this.y, this.width, this.height);
   }
 
-  nextImage(){
-    this.curImg = (this.curImg + 1) % this.imgArr.length;
+  nextImage() {
+    let nextCurImg = (this.curImg + 1) % this.imgArr.length;
+    this.changeHitbox(nextCurImg);
+    this.curImg = nextCurImg;
+  }
+
+  prevImage() {
+    let nextCurImg = this.curImg - 1 >= 0 ? this.curImg - 1 : this.imgArr.length - 1;
+    this.changeHitbox(nextCurImg);
+    this.curImg = nextCurImg;
+  }
+  
+  changeHitbox(nextCurImg) {
+    if(this.imgArr[this.curImg].width != this.imgArr[nextCurImg].width) {
+      this.width = Math.round(this.width * (this.imgArr[nextCurImg].width / this.imgArr[this.curImg].width));
+    }
+    if(this.imgArr[this.curImg].height != this.imgArr[nextCurImg].height) {
+      this.height = Math.round(this.height * (this.imgArr[nextCurImg].height / this.imgArr[this.curImg].height));
+    }
   }
 
   changeButton(inImgArr) {
@@ -703,35 +722,44 @@ class Button {
   }
 }
 
+// Prevents the Button from registering touches as double clicks
+let camButtonEnabled = true;
+
 function mousePressed() {
-  if(camButton.over()) {
+  if(camButton.over() && camButtonEnabled) {
     camButton.nextImage();
-  } else if (scoreButton.over()) {
+  }
+}
+
+function mouseClicked() {
+  if(scoreButton.over()) {
     scoreButton.nextImage();
     showScore = !showScore;
   }
 }
 
 function mouseReleased() {
-  if(camButton.over()) {
+  if(camButton.over() && camButtonEnabled) {
+    camButtonEnabled = false;
     switch(camMode) {
       case CameraMode.FREE:
         flyToPos();
         disableMapInteraction();
         camMode = CameraMode.PLAYER;
-        camButton = new Button(windowWidth - 60, 20, 50, 57, camPlayerImgs);
+        camButton.changeButton(camPlayerImgs);
         break;
       case CameraMode.PLAYER:
         disableMapInteraction();
         fitToPolygon(coords);
         camMode = CameraMode.POLYGON;
-        camButton = new Button(windowWidth - 60, 20, 50, 57, camPolygonImgs);
+        camButton.changeButton(camPolygonImgs);
         break;
       default:
         enableMapInteraction();
-        camButton = new Button(windowWidth - 60, 20, 50, 57, camFreeImgs);
+        camButton.changeButton(camFreeImgs);
         camMode = CameraMode.FREE;
     }
+    setTimeout(function() {camButtonEnabled = true}, 300);
   }
 }
 
@@ -741,7 +769,6 @@ function disableMapInteraction() {
   myMap.map.dragPan.disable();
   myMap.map.dragRotate.disable();
   myMap.map.keyboard.disable();
-  myMap.map.doubleClickZoom.disable();
   myMap.map.touchZoomRotate.disable();
   myMap.map.touchPitch.disable();
 }
@@ -752,7 +779,27 @@ function enableMapInteraction() {
   myMap.map.dragPan.enable();
   myMap.map.dragRotate.enable();
   myMap.map.keyboard.enable();
-  myMap.map.doubleClickZoom.enable();
   myMap.map.touchZoomRotate.enable();
   myMap.map.touchPitch.enable();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+function gen_uid() {
+  /*
+   erzeuge eine user id anhänig von bildschirmaufläsung; browser id, etc....
+   https://pixelprivacy.com/resources/browser-fingerprinting/
+   https://en.wikipedia.org/wiki/Device_fingerprint
+  */
+  var navigator_info = window.navigator;
+  var screen_info = window.screen;
+  var uid = navigator_info.mimeTypes.length;
+  uid += navigator_info.userAgent.replace(/\D+/g, '');
+  uid += navigator_info.plugins.length;
+  uid += screen_info.height || '';
+  uid += screen_info.width || '';
+  uid += screen_info.pixelDepth || '';
+  return uid;
 }
