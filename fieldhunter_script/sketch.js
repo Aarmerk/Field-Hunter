@@ -65,7 +65,7 @@ var linesIntersect = false;
 var theta;
 
 function preload() {
-  myFont = loadFont('Ligconsolata-Regular.otf');
+  myFont = loadFont('../fonts/ErasBoldITC.ttf');
 
   camFreeImgs[0] = loadImage('../cambutton/Camera1.png');
   camFreeImgs[1] = loadImage('../cambutton/Camera1_clicked.png');
@@ -74,15 +74,15 @@ function preload() {
   camPolygonImgs[0] = loadImage('../cambutton/Camera3.png');
   camPolygonImgs[1] = loadImage('../cambutton/Camera3_clicked.png');
 
-  scoreImgs[0] = loadImage('../scorebutton/rankingUp.png');
-  scoreImgs[1] = loadImage('../scorebutton/rankingDown.png');
+  for (let i = 0; i < 19; i++) {
+    scoreImgs[i] = loadImage('../scorebutton/ranking' + i + '.png');
+  }
 }
 
 function setup() {
   canvas = createCanvas(windowWidth, windowHeight);
   canvas.style('display', 'block');
   textFont(myFont, 20);
-  textSize(20);
   hullAlpha = 200;
 	theta = 0; 
 
@@ -199,7 +199,7 @@ function setupGui() {
 
   camButton = new Button(windowWidth - 60, 20, 50, 57, camFreeImgs);
 
-  scoreButton = new Button(20, 20, 53, 57, scoreImgs);
+  scoreButton = new Button(10, 20, 53, 53, scoreImgs);
 }
 
 function positionChanged(position) {
@@ -221,7 +221,7 @@ function positionChanged(position) {
       if(camMode == CameraMode.PLAYER) {
         flyToPos();
       } else if (camMode == CameraMode.POLYGON) {
-        fitToPolygon();
+        fitToPolygon(coords);
       }
     }
     return;
@@ -244,7 +244,7 @@ function error() {
   gpsOn = false;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -351,42 +351,48 @@ function drawGui() {
   var info = "Score: " + score;
   textSize(20);
   textAlign(CENTER);
-  textStyle(BOLD);
   stroke(0);
   fill(255, 255, 255);
-  text(info, windowWidth / 2, windowHeight - 20);
+  text(info, windowWidth / 2, windowHeight - 30);
   textAlign(LEFT);
 
   if (showScore == true) {
-    fill("rgba(0, 215, 249, 0.7)");
-    stroke(255);
-    strokeWeight(5);
-    rect(23, 107, 170, 120);
-
-    if (players != null) {
+    if(scoreButton.getCurImg() < scoreImgs.length - 1) {
+      setTimeout(scoreButton.nextImage(), 120);
+    }
+    scoreButton.display();
+    if (players != null && scoreButton.getCurImg() == scoreImgs.length - 1) {
       var highscore = "";
+      noStroke();
+      textSize(14);
 
-      scoreLenght = ranking.length < 5 ? ranking.length : 5;
+      scoreLenght = ranking.length < 6 ? ranking.length : 6;
       for (var i = 0; i < scoreLenght; i++) {
-        highscore += i+1 + "." + ranking[i].name + ":" + ranking[i].score + "\n";
+        highscore = i+1 + ". " + ranking[i].name + ": " + ranking[i].score + "\n";
+        if(ranking[i].uid == uid) {
+          fill(255, 255, 0);
+        } else {
+          fill(255, 255, 255);
+        }
+        text(highscore, 13, 70 + (i * 15));
       }
 
       let selfRanking = ranking.findIndex((element) => element.uid == uid) + 1;
       if(selfRanking > 5) {
-        highscore += selfRanking + "." + pName.value() + ":" + score;
+        highscore = selfRanking + ". " + pName.value() + ": " + score;
+        fill(255, 255, 0);
+        text(highscore, 13, 70 + (5 * 15));
       }
-
-      fill(255, 255, 255);
-      textSize(20);
-      noStroke();
-      text("Rankings:", 27, 125);
-      textSize(12);
-      text(highscore, 27, 140);
     }
+  } else {
+    if(scoreButton.getCurImg() > 0) {
+      setTimeout(scoreButton.prevImage(), 120);
+    }
+    scoreButton.display();
   }
 
   camButton.display();
-  scoreButton.display();
+
   pop();
 }
 
@@ -412,8 +418,8 @@ function increaseScore() {
   disableMapInteraction();
   fitToPolygon(hullPoints);
   setTimeout(function() {flyToPos()}, 3000);
-  score += round(polygonArea(hullPoints));
-  if(camMode = CameraMode.FREE) {
+  score += round(polygonArea(hullPoints) * 10);
+  if(camMode == CameraMode.FREE) {
     setTimeout(function() {enableMapInteraction()}, 6000);
   }
 }
@@ -711,6 +717,12 @@ class Button {
     this.imgArr = inImgArr;
     this.curImg = 0;
   }
+
+  getCurImg() {
+    return this.curImg;
+  }
+
+
   // over automatically matches the width & height of the image read from the file
   // see this.img.width and this.img.height below
   over() {
@@ -724,40 +736,49 @@ class Button {
 
 // Prevents the Button from registering touches as double clicks
 let camButtonEnabled = true;
+let camButtonActivated = false;
 
 function mousePressed() {
   if(camButton.over() && camButtonEnabled) {
     camButton.nextImage();
+    camButtonActivated = true;
   }
 }
 
 function mouseClicked() {
   if(scoreButton.over()) {
-    scoreButton.nextImage();
-    showScore = !showScore;
+    showScore = !showScore
   }
 }
 
+
 function mouseReleased() {
-  if(camButton.over() && camButtonEnabled) {
-    camButtonEnabled = false;
-    switch(camMode) {
-      case CameraMode.FREE:
-        flyToPos();
-        disableMapInteraction();
-        camMode = CameraMode.PLAYER;
-        camButton.changeButton(camPlayerImgs);
-        break;
-      case CameraMode.PLAYER:
-        disableMapInteraction();
-        fitToPolygon(coords);
-        camMode = CameraMode.POLYGON;
-        camButton.changeButton(camPolygonImgs);
-        break;
-      default:
-        enableMapInteraction();
-        camButton.changeButton(camFreeImgs);
-        camMode = CameraMode.FREE;
+  if(camButtonActivated) {
+    if(camButton.over()) {
+      camButtonEnabled = false;
+      camButtonActivated = false;
+      switch(camMode) {
+        case CameraMode.FREE:
+          flyToPos();
+          disableMapInteraction();
+          camMode = CameraMode.PLAYER;
+          camButton.changeButton(camPlayerImgs);
+          break;
+        case CameraMode.PLAYER:
+          disableMapInteraction();
+          if(coords.length > 0) {
+            fitToPolygon(coords);
+          }
+          camMode = CameraMode.POLYGON;
+          camButton.changeButton(camPolygonImgs);
+          break;
+        default:
+          enableMapInteraction();
+          camButton.changeButton(camFreeImgs);
+          camMode = CameraMode.FREE;
+      }
+    } else {
+      camButton.nextImage();
     }
     setTimeout(function() {camButtonEnabled = true}, 300);
   }
