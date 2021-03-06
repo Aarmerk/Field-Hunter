@@ -12,7 +12,7 @@ html, body {
 	overflow-x: hidden;
 }
 
-.imgmap{
+.imgmap {
 	min-height: 100%;
     background-image: url("../../background/Background.jpg");
     background-size: auto 100%;
@@ -21,12 +21,12 @@ html, body {
 	background-color: rgb(9, 9, 9);
 }
 
-#menuscreen  {
+#menuscreen {
 	margin: 0;
 	padding: 0;
 	border: 0;
     position: absolute;
-    top: 50%;
+    top: 52%;
     left: 50%;
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
@@ -38,13 +38,27 @@ html, body {
 img { 
     margin:0;
     padding:0;
-    border:0; 
+    border:0;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
 }
 
 #img1 {
     height: 30px;
     width: 300px;
 }  
+
+input {
+    font-style: normal;
+    font-size: 15px;
+    font-family: 'eras-bold-itc';
+    margin: 10px;
+    text-align: center;
+    background: white;
+    color: black;
+}
 
 button {
     text-align: center;
@@ -68,16 +82,6 @@ button {
     width: inherit;
 }
 
-input {
-    font-style: normal;
-    font-size: 15px;
-    font-family: 'eras-bold-itc';
-    margin: 10px;
-    text-align: center;
-    background: white;
-    color: black;
-}
-
 #text1 {
     border: 4px solid rgb(0, 195, 255);
     padding: 8px 0px;
@@ -86,3 +90,32 @@ input {
     border-radius: 4px;
     box-sizing: border-box;
 }
+
+#logo {
+    height: 90px;
+    width: 200px;
+}
+
+.shake-animations {    
+    /* Start the shake animation and make the animation last for 0.5 seconds */
+    animation: shake;
+
+    animation-duration: 0.2s;
+
+    /* When the animation is finished, start again */
+    animation-iteration-count: 3;
+}
+
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(3px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(1px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+  }

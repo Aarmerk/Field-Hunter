@@ -12,6 +12,11 @@ const CameraMode = Object.freeze({
   POLYGON: 3,
 });
 let camMode = CameraMode.FREE;
+// Prevents the Button from registering touches as double clicks
+let camButtonEnabled = true;
+let camButtonActivated = false;
+let camAlpha = 0;
+var cameraInfo = "";
 
 let showScore = false;
 let scoreButton;
@@ -27,6 +32,7 @@ let gpsOn = true;
 let myMap;
 let lat = -1.0; // wo bin ich
 let long = -1.0;
+let loadingAlpha = 255;
 
 // Map options
 const options = {
@@ -126,6 +132,15 @@ function draw() {
     drawPolygon();
     drawLine();
     drawPlayer();
+  }
+  if(loadingAlpha != 0) {
+    loadColor = color(37, 34, 35);
+    loadColor.setAlpha(loadingAlpha);
+    fill(loadColor);
+    rect(0, 0, windowWidth, windowHeight);
+    if(myMap != null) {
+      loadingAlpha = loadingAlpha - 5 > 0 ? loadingAlpha - 5 : 0;
+    }
   }
   drawGui();
 }
@@ -343,7 +358,28 @@ function drawPlayer() {
 
 function drawGui() {
   push();
+  if(camButtonActivated) {
+    camAlpha = 255;
+    switch(camMode) {
+      case CameraMode.POLYGON:
+        cameraInfo = "free camera mode";
+        break;
+      case CameraMode.FREE:
+        cameraInfo = "player view";
+        break;
+      default:
+        cameraInfo = "polygon view";
+    }
+  }
+  textSize(15);
+  textAlign(CENTER);
+  var textColor = color(255, 255, 255);
+  camAlpha = camAlpha - 8 < 0 ? 0 : camAlpha - 8;
+  textColor.setAlpha(camAlpha);
+  fill(textColor);
+  text(cameraInfo, windowWidth / 2, windowHeight - 40);
 
+  textAlign(LEFT);
   if (showScore == true) {
     if(scoreButton.getCurImg() < scoreImgs.length - 1) {
       setTimeout(scoreButton.nextImage(), 120);
@@ -364,13 +400,13 @@ function drawGui() {
         }
         text(highscore, 13, 70 + (i * 15));
       }
-
       let selfRanking = ranking.findIndex((element) => element.uid == uid) + 1;
       if(selfRanking > 5) {
         highscore = selfRanking + "." + pName + ": " + score;
         fill(255, 255, 0);
         text(highscore, 13, 70 + (5 * 15));
       }
+
     }
   } else {
     if(scoreButton.getCurImg() > 0) {
@@ -721,10 +757,6 @@ class Button {
     }
   }
 }
-
-// Prevents the Button from registering touches as double clicks
-let camButtonEnabled = true;
-let camButtonActivated = false;
 
 function mousePressed() {
   if(camButton.over() && camButtonEnabled) {
