@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="" class="imgmap">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>fieldhunter</title>
+        <link rel="icon" 
+            type="image/png" 
+            sizes="16x16"
+            href="../favicon/favicon-16x16.png" />
+        <link rel="icon" 
+            type="image/png"
+            sizes="32x32" 
+            href="../favicon/favicon-32x32.png" />
+        <link rel="stylesheet" href="style.css">
+        <script type="text/javascript">
+            function fn1()
+            {
+                document.getElementById("btn1img").src = "../../inputbox/Play_Button_clicked.png";
+            }
+            function fn2() 
+            {
+                var pName = document.getElementById("text1").value;
+                if(pName.trim()) {
+                    sessionStorage.setItem('playerName', pName);
+                    window.location.href = "../main/index.html";
+                } else {
+                    document.getElementById("text2").style.opacity = "100%";
+                }
+                document.getElementById("btn1img").src = "../../inputbox/Play_Button.png";
+            }
+        </script>
+    <head>
+    <body>
+        <div id="menuscreen" >
+                <img id="img1" src="../../inputbox/Enter_Name.png" alt="Enter your name below">
+                <br>
+                <br>
+                <input id="text1" placeholder="Name" maxlength="10">
+                <br>
+                <br>
+                <button ontouchstart = "fn1()" onmousedown = "fn1()" onmouseup="fn2()" id="btn1"><img src="../../inputbox/Play_Button.png" id="btn1img"></button>
+                <br>
+                <p id="text2" style="opacity: 0%; color: white">Please enter a name first!</p>
+        </div>
+        <div style="position: absolute; bottom: 2px; font-size: 6px">
+            <a href="www.freepik.com " style="color: white; text-decoration: none">Background designed by Freepik</a>
+        </div>
+    </body>
+</html>

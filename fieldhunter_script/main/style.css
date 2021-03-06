@@ -1,0 +1,28 @@
+/* style.css */
+
+html, body {
+  overflow-x: hidden;
+  height:100%;
+  width:100%;
+  margin:0;
+  padding:0;
+}
+
+body {
+  display: flex;
+
+  /* This centers our sketch horizontally. */
+  justify-content: center;
+
+  /* This centers our sketch vertically. */
+  align-items: center;
+}
+
+main {
+  width: inherit;
+  height: inherit;
+}
+
+canvas {
+  display: block;
+}

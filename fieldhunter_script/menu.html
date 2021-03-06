@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>fieldhunter</title>
+        <link rel="icon" 
+            type="image/png" 
+            sizes="16x16"
+            href="../favicon/favicon-16x16.png" />
+        <link rel="icon" 
+            type="image/png"
+            sizes="32x32" 
+            href="../favicon/favicon-32x32.png" />
+        <script type="text/javascript">
+            function fn1() 
+            {
+                var pName = document.getElementById("text1").value;
+                if(pName.trim()) {
+                    sessionStorage.setItem('playerName', pName);
+                    window.location.href = "../main/index.html";
+                }
+            }
+        </script>
+    <head>
+    <body>
+        <input id = "text1" placeholder="Enter your name" maxlength="10">
+        <br>
+        <button onclick="fn1()" id="btn1">Click me</button>
+    </body>
+</html>
