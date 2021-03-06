@@ -313,8 +313,8 @@ function drawPlayer() {
   text(pName, mypos.x + 20, mypos.y);
 
   //Player score
-  noStroke();
-  fill(0, 255, 255);
+  stroke(0);
+  fill(255, 255, 255);
   text(score, mypos.x + 20, mypos.y + 18);
 
   if (players != null) {
@@ -343,13 +343,6 @@ function drawPlayer() {
 
 function drawGui() {
   push();
-  var info = "Score: " + score;
-  textSize(20);
-  textAlign(CENTER);
-  stroke(0);
-  fill(255, 255, 255);
-  text(info, windowWidth / 2, windowHeight - 40);
-  textAlign(LEFT);
 
   if (showScore == true) {
     if(scoreButton.getCurImg() < scoreImgs.length - 1) {
@@ -361,9 +354,9 @@ function drawGui() {
       noStroke();
       textSize(14);
 
-      scoreLenght = ranking.length < 6 ? ranking.length : 6;
+      scoreLenght = ranking.length < 5 ? ranking.length : 5;
       for (var i = 0; i < scoreLenght; i++) {
-        highscore = i+1 + ". " + ranking[i].name + ": " + ranking[i].score + "\n";
+        highscore = i+1 + "." + ranking[i].name + ": " + ranking[i].score + "\n";
         if(ranking[i].uid == uid) {
           fill(255, 255, 0);
         } else {
@@ -374,7 +367,7 @@ function drawGui() {
 
       let selfRanking = ranking.findIndex((element) => element.uid == uid) + 1;
       if(selfRanking > 5) {
-        highscore = selfRanking + ". " + pName + ": " + score;
+        highscore = selfRanking + "." + pName + ": " + score;
         fill(255, 255, 0);
         text(highscore, 13, 70 + (5 * 15));
       }
