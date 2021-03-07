@@ -1,6 +1,7 @@
 let canvas;
 let myFont;
 
+// Camera Button
 var camButton;
 let camFreeImgs = [];
 let camPlayerImgs = [];
@@ -18,6 +19,7 @@ let camButtonActivated = false;
 let camAlpha = 0;
 var cameraInfo = "";
 
+// Score Button
 let showScore = false;
 let scoreButton;
 let scoreImgs = [];
@@ -28,7 +30,6 @@ var key = 'pk.eyJ1Ijoic2ltdGluIiwiYSI6ImNraW5mODU2ajA4ZTUyem1sMGQ1MXRsYmYifQ.QiM
 // Create a new Mappa instance.
 var mappa = new Mappa('MapboxGL', key);
 let gpsOn = true;
-
 let myMap;
 let lat = -1.0; // wo bin ich
 let long = -1.0;
@@ -70,6 +71,9 @@ var linesIntersect = false;
 // Pulsing Dot
 var theta;
 
+// Player
+const playerColor = 'hsl(' + Math.floor(Math.random() * Math.floor(100)) + ', 100%, 55%)';
+
 function preload() {
   myFont = loadFont('../../fonts/ErasBoldITC.ttf');
 
@@ -92,6 +96,7 @@ function setup() {
   canvas = createCanvas(windowWidth, windowHeight);
   canvas.style('display', 'block');
   textFont(myFont, 20);
+
   hullAlpha = 200;
 	theta = 0; 
 
@@ -128,11 +133,6 @@ function setup() {
 
 function draw() {
   clear();
-  if(myMap != null) {
-    drawPolygon();
-    drawLine();
-    drawPlayer();
-  }
   if(loadingAlpha != 0) {
     loadColor = color(37, 34, 35);
     loadColor.setAlpha(loadingAlpha);
@@ -141,6 +141,11 @@ function draw() {
     if(myMap != null) {
       loadingAlpha = loadingAlpha - 5 > 0 ? loadingAlpha - 5 : 0;
     }
+  }
+  if(myMap != null) {
+    drawPolygon();
+    drawLine();
+    drawPlayer();
   }
   drawGui();
 }
@@ -179,7 +184,8 @@ function updatePlayerData() {
     name: pName,
     score: score,
     timestamp: Date.now(),
-    uid: uid
+    uid: uid,
+    color: playerColor
   });
 }
 
@@ -264,7 +270,7 @@ function drawPolygon(){
   push();
   if(linesIntersect) {
     noStroke();
-    hullColor = color(255, 0, 255);
+    hullColor = color(playerColor);
     hullColor.setAlpha(hullAlpha);
     fill(hullColor);
     beginShape();
@@ -289,7 +295,7 @@ function drawLine() {
   for (var i = 0; i < (coords.length - 1); i++) {
     var pos1 = myMap.latLngToPixel(coords[i].x, coords[i].y);
     var pos2 = myMap.latLngToPixel(coords[i + 1].x, coords[i + 1].y);
-    stroke('rgba(255, 0, 255, 1)');
+    stroke(playerColor);
     strokeWeight(myMap.zoom() / 2);
     line(pos1.x, pos1.y, pos2.x, pos2.y);
     if(linesIntersect && i == coords.length - 2) {
@@ -310,27 +316,12 @@ function drawPlayer() {
     var maxDiameter = pow(1.4, size);
     var diam = (((size / 2) * 0.7 * theta) % maxDiameter) + size;
     noStroke();
-    var playerColor = color(255, 0, 255);
-    playerColor.setAlpha(150 - (diam *  (150 / maxDiameter)));
-    fill(playerColor);
+    var pulseColor = color(playerColor);
+    pulseColor.setAlpha(150 - (diam *  (150 / maxDiameter)));
+    fill(pulseColor);
     ellipse(mypos.x, mypos.y, diam, diam);
     theta += (maxDiameter / 250);
   }
-
-  //Player
-  stroke(255);
-  fill(255, 0, 255);
-  ellipse(mypos.x, mypos.y, size, size);
-
-  //Player name
-  noStroke();
-  fill(255, 0, 255);
-  text(pName, mypos.x + 20, mypos.y);
-
-  //Player score
-  stroke(0);
-  fill(255, 255, 255);
-  text(score, mypos.x + 20, mypos.y + 18);
 
   if (players != null) {
     var keys = Object.keys(players);
@@ -341,18 +332,38 @@ function drawPlayer() {
         var pos = myMap.latLngToPixel(players[k].lat, players[k].long);
         size = map(myMap.zoom(), 1, 6, 5, 7);
         
+        var otherColor = players[k].color != null ? players[k].color : 'rgb(255, 0, 255)';
         // Other
-        stroke(255);
-        fill(0, 255, 255)
+        noStroke();
+        fill(otherColor)
         ellipse(pos.x, pos.y, size, size);
 
         // Other name
-        stroke(0);
-        fill(0, 255, 255);
+        fill(otherColor);
         text(players[k].name, pos.x + 20, pos.y);
+
+        //Player score
+        fill(otherColor);
+        text(players[k].score, pos.x + 20, pos.y + 18);
       }
     }
   }
+
+  //Player
+  stroke(255);
+  fill(playerColor);
+  ellipse(mypos.x, mypos.y, size, size);
+
+  //Player name
+  noStroke();
+  fill(playerColor);
+  text(pName, mypos.x + 20, mypos.y);
+
+  //Player score
+  stroke(0);
+  fill(255, 255, 255);
+  text(score, mypos.x + 20, mypos.y + 18);
+
   pop();
 }
 
