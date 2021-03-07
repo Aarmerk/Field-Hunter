@@ -7,11 +7,11 @@ html, body {
 	margin: 0;
     padding: 0;
     border: 0;
-    height: 600px;
+    height: 100%;
     width: 100%;
     font-family: 'eras-bold-itc';
-    overflow-y: hidden;
 	overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 .imgmap {
@@ -28,7 +28,7 @@ html, body {
 	padding: 0;
 	border: 0;
     position: absolute;
-    top: 330px;
+    top: 52%;
     left: 50%;
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);

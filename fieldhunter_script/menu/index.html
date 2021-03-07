@@ -2,7 +2,7 @@
 <html lang="" class="imgmap">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+        <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
         <title>fieldhunter</title>
         <link rel="icon" 
             type="image/png" 
@@ -14,6 +14,10 @@
             href="../../favicon/favicon-32x32.png" />
         <link rel="stylesheet" href="style.css">
         <script type="text/javascript">
+            var viewheight = window.innerHeight;
+            var viewwidth = window.innerHeight;
+            document.getElementById("viewport").setAttribute("content", "height=" + viewheight + "px, width=" + viewwidth + "px, initial-scale=1.0");
+
             function fn1()
             {
                 document.getElementById("btn1img").src = "../../menuimages/Play_Button_clicked.png";
@@ -46,7 +50,7 @@
                 <br>
                 <div id="text2" style="opacity: 0%; color: white">Please enter a name first!</div>
         </div>
-        <div style="position: absolute; bottom: 2px; left: 2px; font-size: 6px">
+        <div style="position: absolute; bottom: 2px; left: 2px; font-size: 3px">
             <a href="https://de.freepik.com/vektoren/hintergrund" style="color: white; text-decoration: none">Background designed by Freepik</a>
         </div>
     </body>
