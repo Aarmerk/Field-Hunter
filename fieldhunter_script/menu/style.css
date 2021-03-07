@@ -10,6 +10,7 @@ html, body {
     height: 600px;
     width: 100%;
     font-family: 'eras-bold-itc';
+    overflow-y: hidden;
 	overflow-x: hidden;
 }
 
