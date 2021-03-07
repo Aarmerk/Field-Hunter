@@ -7,7 +7,6 @@ html, body {
 	margin: 0;
     padding: 0;
     border: 0;
-    position: relative;
     height: 100%;
     width: 100%;
     font-family: 'eras-bold-itc';
@@ -29,7 +28,7 @@ html, body {
 	padding: 0;
 	border: 0;
     position: absolute;
-    top: 52%;
+    top: 330px;
     left: 50%;
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
