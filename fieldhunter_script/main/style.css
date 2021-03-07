@@ -22,7 +22,21 @@ body {
 
   /* This centers our sketch vertically. */
   align-items: center;
-}
+  
+  animation: fadeInAnimation ease 3s;
+  animation-iteration-count: 1; 
+  animation-fill-mode: forwards; 
+} 
+
+@keyframes fadeInAnimation { 
+  0% { 
+      opacity: 0; 
+  } 
+  100% { 
+      opacity: 1; 
+   } 
+} 
+
 
 main {
   width: inherit;
@@ -39,7 +53,7 @@ canvas {
   position: absolute;
   top: 0;
   left: 0;
-  background-color: #252223;
+  background-color: #031627;
   display:flex;
   justify-content: center;
   align-items: center;

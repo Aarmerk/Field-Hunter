@@ -33,7 +33,6 @@ let gpsOn = true;
 let myMap;
 let lat = -1.0; // wo bin ich
 let long = -1.0;
-let loadingAlpha = 255;
 
 // Map options
 const options = {
@@ -72,7 +71,7 @@ var linesIntersect = false;
 var theta;
 
 // Player
-const playerColor = 'hsl(' + Math.floor(Math.random() * Math.floor(100)) + ', 100%, 55%)';
+const playerColor = 'hsl(' + Math.round(Math.random() * 255) + ', 100%, 55%)';
 
 function preload() {
   myFont = loadFont('../../fonts/ErasBoldITC.ttf');
@@ -133,16 +132,7 @@ function setup() {
 
 function draw() {
   clear();
-  if(loadingAlpha != 0) {
-    loadColor = color(37, 34, 35);
-    loadColor.setAlpha(loadingAlpha);
-    fill(loadColor);
-    rect(0, 0, windowWidth, windowHeight);
-    if(myMap != null) {
-      loadingAlpha = loadingAlpha - 5 > 0 ? loadingAlpha - 5 : 0;
-    }
-  }
-  if(myMap != null) {
+  if(typeof myMap !== 'undefined') {
     drawPolygon();
     drawLine();
     drawPlayer();
@@ -246,12 +236,11 @@ function positionChanged(position) {
   if(lat != position.latitude || long != position.longitude) {
     lat = position.latitude;
     long = position.longitude;
-    if(map == undefined) {
-      setupMap();
-    } else {
+    if(typeof myMap !== 'undefined') {
       flyToPos();
+    } else {
+      setupMap();
     }
-    myMap.map.doubleClickZoom.disable();
   }
   coords.push(newCoord);
 }
