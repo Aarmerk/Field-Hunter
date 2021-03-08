@@ -32,6 +32,24 @@
                 }
                 document.getElementById("btn1img").src = "../../menuimages/Play_Button.png";
             }
+
+            function onReady(callback) {
+                var intervalId = window.setInterval(function() {
+                    if (document.getElementsByTagName('body')[0] !== undefined) {
+                        window.clearInterval(intervalId);
+                        callback.call(this);
+                    }
+                }, 1000);
+            }
+
+            function setVisible(selector, visible) {
+                document.querySelector(selector).style.display = visible ? 'block' : 'none';
+            }
+
+            onReady(function() {
+                document.getElementById("loading").classList.add("fadeOut");
+                setTimeout(function() {setVisible("#loading", false)}, 1000);
+            });
         </script>
     <head>
     <body>
@@ -48,6 +66,9 @@
         </div>
         <div style="position: absolute; bottom: 2px; left: 2px; font-size: 3px">
             <a href="https://de.freepik.com/vektoren/hintergrund" style="color: white; text-decoration: none">Background designed by Freepik</a>
+        </div>
+        <div id="loading" class="loadingclass">
+            <span class="loader"><span class="loader-inner"></span></span>
         </div>
     </body>
 </html>

@@ -39,7 +39,7 @@ const options = {
   lat: lat, // center in bremen
   lng: long,
   zoom: 18,
-  //minZoom: 15,
+  minZoom: 1,
   maxZoom: 22,
   style: 'mapbox://styles/simtin/ckl5nkoog2sf317qhmranwvs6',
   pitch: 0,
@@ -345,6 +345,10 @@ function drawPlayer() {
 
   //Player name
   noStroke();
+  drawingContext.shadowOffsetX = 5;
+  drawingContext.shadowOffsetY = 5;
+  drawingContext.shadowBlur = 1;
+  drawingContext.shadowColor = 'black';
   fill(playerColor);
   text(pName, mypos.x + 20, mypos.y);
 
@@ -374,7 +378,7 @@ function drawGui() {
   textSize(15);
   textAlign(CENTER);
   var textColor = color(255, 255, 255);
-  camAlpha = camAlpha - 8 < 0 ? 0 : camAlpha - 8;
+  camAlpha = camAlpha - 5 < 0 ? 0 : camAlpha - 5;
   textColor.setAlpha(camAlpha);
   fill(textColor);
   text(cameraInfo, windowWidth / 2, windowHeight - 40);
