@@ -353,7 +353,7 @@ function drawPlayer() {
   angleMode(DEGREES); // Change the mode to DEGREES
   imageMode(CENTER);
   translate(mypos.x, mypos.y);
-  rotate(90 - rotationZ);
+  rotate(90 - rotationZ + myMap.map.getBearing());
   image(playerImage, 0, 0, size * 1.4, size * 2.8);
   pop();
 
@@ -451,6 +451,7 @@ function changeImageHue(img, hue) {
   return img;
 }
 
+// Takes a RGBA array and returns an HSLA array
 function rgba2hsla(rgba) {
   let r = rgba[0];
   let g = rgba[1];
@@ -583,11 +584,10 @@ function getIntersectionPoint(a, b, c, d) {
     var y = (a1 * c2 - a2 * c1) / det; 
     return mercToLatLong({x: x, y: y}); 
   }
-
 }
 
-  /*  returns true if the line from p1->p2 intersects with q1->q2
-  */
+/*  returns true if the line from p1->p2 intersects with q1->q2
+*/
 function intersects(p1, p2, q1, q2) {
   var det, gamma, lambda;
 
