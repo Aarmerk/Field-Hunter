@@ -356,7 +356,7 @@ function drawPlayer() {
   if(typeof myMap.map !== 'undefined') {
     rotate(-rotationZ - myMap.map.getBearing());
   }
-  image(playerImage, 0, 0, pow(size, 3) * 0.012, pow(size, 3) * 0.024);
+  image(playerImage, 0, 0, pow(size, 5) * 0.0001, pow(size, 5) * 0.0002);
   pop();
 
   //Player name
