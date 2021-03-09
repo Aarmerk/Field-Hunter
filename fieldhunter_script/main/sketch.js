@@ -354,7 +354,7 @@ function drawPlayer() {
   imageMode(CENTER);
   translate(mypos.x, mypos.y);
   if(typeof myMap.map !== 'undefined') {
-    rotate(rotationZ - myMap.map.getBearing());
+    rotate(-rotationZ - myMap.map.getBearing());
   }
   image(playerImage, 0, 0, pow(size, 5) * 0.0001, pow(size, 5) * 0.0002);
   pop();
