@@ -353,7 +353,9 @@ function drawPlayer() {
   angleMode(DEGREES); // Change the mode to DEGREES
   imageMode(CENTER);
   translate(mypos.x, mypos.y);
-  rotate(90 - rotationZ + myMap.map.getBearing());
+  if(typeof myMap.map !== 'undefined') {
+    rotate(90 - rotationZ + myMap.map.getBearing());
+  }
   image(playerImage, 0, 0, size * 1.4, size * 2.8);
   pop();
 
