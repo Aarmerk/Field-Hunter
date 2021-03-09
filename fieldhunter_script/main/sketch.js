@@ -71,7 +71,9 @@ var linesIntersect = false;
 var theta;
 
 // Player
-const playerColor = 'hsl(' + Math.round(Math.random() * 255) + ', 100%, 55%)';
+const playerHue = Math.round(Math.random() * 255);
+const playerColor = 'hsl(' + playerHue + ', 100%, 55%)';
+let playerImage;
 
 function preload() {
   myFont = loadFont('../../fonts/ErasBoldITC.ttf');
@@ -89,12 +91,16 @@ function preload() {
   if(sessionStorage.getItem('playerName') != null) {
     pName = sessionStorage.getItem('playerName'); // holt pNamen aus dem session storage
   }
+
+  playerImage = loadImage('../../playercharacter/Spray.png');
 }
 
 function setup() {
   canvas = createCanvas(windowWidth, windowHeight);
   canvas.style('display', 'block');
   textFont(myFont, 20);
+
+  playerImage = changeImageHue(playerImage, playerHue);
 
   hullAlpha = 200;
 	theta = 0; 
@@ -242,6 +248,7 @@ function positionChanged(position) {
       setupMap();
     }
   }
+
   coords.push(newCoord);
 }
 
@@ -302,7 +309,7 @@ function drawPlayer() {
 
   if(gpsOn) {
     // Pulsing circle
-    var maxDiameter = pow(1.4, size);
+    var maxDiameter = pow(1.43, size);
     var diam = (((size / 2) * 0.7 * theta) % maxDiameter) + size;
     noStroke();
     var pulseColor = color(playerColor);
@@ -338,17 +345,20 @@ function drawPlayer() {
     }
   }
 
-  //Player
-  stroke(255);
-  fill(playerColor);
-  ellipse(mypos.x, mypos.y, size, size);
-
-  //Player name
-  noStroke();
   drawingContext.shadowOffsetX = 5;
   drawingContext.shadowOffsetY = 5;
   drawingContext.shadowBlur = 1;
   drawingContext.shadowColor = 'black';
+  push();
+  angleMode(DEGREES); // Change the mode to DEGREES
+  imageMode(CENTER);
+  translate(mypos.x, mypos.y);
+  rotate(90 + rotationZ);
+  image(playerImage, 0, 0, size * 1.4, size * 2.8);
+  pop();
+
+  //Player name
+  noStroke();
   fill(playerColor);
   text(pName, mypos.x + 20, mypos.y);
 
@@ -426,6 +436,48 @@ function drawGui() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+function changeImageHue(img, hue) {
+  img.loadPixels();
+  let newColor;
+  for (let i = 0; i < img.width; i++) {
+    for (let j = 0; j < img.height; j++) {
+      newColor = rgba2hsla(img.get(i, j));
+      newColor[0] = hue;
+      newColor = color('hsla(' + newColor[0] + ',' + newColor[1] + '%,' + newColor[2] + '%,' +  newColor[3] + ')');
+      img.set(i, j, newColor);
+    }
+  }
+  img.updatePixels();
+  return img;
+}
+
+function rgba2hsla(rgba) {
+  let r = rgba[0];
+  let g = rgba[1];
+  let b = rgba[2];
+  let a = rgba[3];
+  r /= 255, g /= 255, b /= 255, a /= 255;
+
+  var max = Math.max(r, g, b), min = Math.min(r, g, b);
+  var h, s, l = (max + min) / 2;
+
+  if (max == min) {
+    h = s = 0; // achromatic
+  } else {
+    var d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+
+    h /= 6;
+  }
+
+  return [h, s * 100, l * 100, a];
+}
 
 
 function sortRanking() {
