@@ -310,7 +310,7 @@ function drawPlayer() {
   if(gpsOn) {
     // Pulsing circle
     var maxDiameter = pow(1.43, size);
-    var diam = (((size / 2) * 0.7 * theta) % maxDiameter) + size;
+    var diam = (((size / 2) * 0.3 * theta) % maxDiameter) + size;
     noStroke();
     var pulseColor = color(playerColor);
     pulseColor.setAlpha(150 - (diam *  (150 / maxDiameter)));
