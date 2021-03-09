@@ -220,6 +220,7 @@ function positionChanged(position) {
     gpsOn = true;
   }
   if(position.heading != null) {
+    rotationZ = 0;
     direction = position.heading;
   }
   const newCoord = {x: position.latitude, y: position.longitude};
