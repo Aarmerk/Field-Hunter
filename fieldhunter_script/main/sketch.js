@@ -358,21 +358,21 @@ function drawPlayer() {
   angleMode(DEGREES); // Change the mode to DEGREES
   imageMode(CENTER);
   translate(mypos.x, mypos.y);
-  if(typeof myMap.map !== 'undefined' && direction >= 0) {
+  if(typeof myMap.map !== 'undefined') {
     rotate(90 - rotationZ - direction - myMap.map.getBearing());
   }
-  image(playerImage, 0, 0, size * 1.4, size * 2.8);
+  image(playerImage, 0, 0, pow(size, 5) * 0.0001, pow(size, 5) * 0.0002);
   pop();
 
   //Player name
   noStroke();
   fill(playerColor);
-  text(pName, mypos.x + 20, mypos.y);
+  text(pName, mypos.x + 22, mypos.y);
 
   //Player score
   stroke(0);
   fill(255, 255, 255);
-  text(score, mypos.x + 20, mypos.y + 18);
+  text(score, mypos.x + 22, mypos.y + 18);
 
   pop();
 }
