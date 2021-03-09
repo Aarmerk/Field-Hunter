@@ -74,7 +74,6 @@ var theta;
 const playerHue = Math.round(Math.random() * 255);
 const playerColor = 'hsl(' + playerHue + ', 100%, 55%)';
 let playerImage;
-let direction = -1;
 
 function preload() {
   myFont = loadFont('../../fonts/ErasBoldITC.ttf');
@@ -219,10 +218,6 @@ function positionChanged(position) {
   if(!gpsOn) {
     gpsOn = true;
   }
-  if(position.heading != null) {
-    rotationZ = 0;
-    direction = position.heading;
-  }
   const newCoord = {x: position.latitude, y: position.longitude};
   
   if(coords.length > 0) {
@@ -359,7 +354,7 @@ function drawPlayer() {
   imageMode(CENTER);
   translate(mypos.x, mypos.y);
   if(typeof myMap.map !== 'undefined') {
-    rotate(90 - rotationZ - direction - myMap.map.getBearing());
+    rotate(rotationZ - myMap.map.getBearing());
   }
   image(playerImage, 0, 0, pow(size, 5) * 0.0001, pow(size, 5) * 0.0002);
   pop();
