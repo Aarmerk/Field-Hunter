@@ -189,3 +189,10 @@ button {
         opacity: 0; 
      } 
 } 
+
+#freepik {
+    position: absolute; 
+    top: unset;
+    left: 2px; 
+    font-size: 2px
+}
