@@ -307,7 +307,7 @@ function drawPlayer() {
   var mypos = myMap.latLngToPixel(lat, long);
   size = map(myMap.zoom(), 1, 6, 5, 7);
 
-  let playerSize = pow(size, 3) * 0.008 + 10;
+  let sizeFactor = pow(size, 2) * 0.1;
 
   if(gpsOn) {
     // Pulsing circle
@@ -334,15 +334,17 @@ function drawPlayer() {
         // Other
         noStroke();
         fill(otherColor)
-        ellipse(pos.x, pos.y, playerSize / 2, playerSize / 2);
+        ellipse(pos.x, pos.y, sizeFactor / 2 + 2,  sizeFactor / 2 + 2);
 
-        // Other name
-        fill(otherColor);
-        text(players[k].name, pos.x + playerSize, pos.y);
+        if(size > 7) {
+          // Other name
+          fill(otherColor);
+          text(players[k].name, pos.x + sizeFactor, pos.y);
 
-        //Player score
-        fill(otherColor);
-        text(players[k].score, pos.x + playerSize, pos.y + 18);
+          //Player score
+          fill(otherColor);
+          text(players[k].score, pos.x + sizeFactor, pos.y + 18);
+        }
       }
     }
   }
@@ -358,18 +360,18 @@ function drawPlayer() {
   if(typeof myMap.map !== 'undefined') {
     rotate(-rotationZ - myMap.map.getBearing());
   }
-  image(playerImage, 0, 0, playerSize, 2 * playerSize);
+  image(playerImage, 0, 0, sizeFactor + 5, 2 * sizeFactor + 10);
   pop();
 
   //Player name
   noStroke();
   fill(playerColor);
-  text(pName, mypos.x + playerSize, mypos.y);
+  text(pName, mypos.x + sizeFactor + 5, mypos.y);
 
   //Player score
   stroke(0);
   fill(255, 255, 255);
-  text(score, mypos.x + playerSize, mypos.y + 18);
+  text(score, mypos.x + sizeFactor + 5, mypos.y + 18);
 
   pop();
 }
