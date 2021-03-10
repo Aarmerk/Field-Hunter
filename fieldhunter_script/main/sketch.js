@@ -307,6 +307,8 @@ function drawPlayer() {
   var mypos = myMap.latLngToPixel(lat, long);
   size = map(myMap.zoom(), 1, 6, 5, 7);
 
+  let playerSize = pow(size, 3) * 0.008 + 10;
+
   if(gpsOn) {
     // Pulsing circle
     var maxDiameter = pow(1.43, size);
@@ -332,15 +334,15 @@ function drawPlayer() {
         // Other
         noStroke();
         fill(otherColor)
-        ellipse(pos.x, pos.y, size, size);
+        ellipse(pos.x, pos.y, playerSize / 2, playerSize / 2);
 
         // Other name
         fill(otherColor);
-        text(players[k].name, pos.x + 20, pos.y);
+        text(players[k].name, pos.x + playerSize, pos.y);
 
         //Player score
         fill(otherColor);
-        text(players[k].score, pos.x + 20, pos.y + 18);
+        text(players[k].score, pos.x + playerSize, pos.y + 18);
       }
     }
   }
@@ -356,18 +358,18 @@ function drawPlayer() {
   if(typeof myMap.map !== 'undefined') {
     rotate(-rotationZ - myMap.map.getBearing());
   }
-  image(playerImage, 0, 0, pow(size, 5) * 0.0001, pow(size, 5) * 0.0002);
+  image(playerImage, 0, 0, playerSize, 2 * playerSize);
   pop();
 
   //Player name
   noStroke();
   fill(playerColor);
-  text(pName, mypos.x + 22, mypos.y);
+  text(pName, mypos.x + playerSize, mypos.y);
 
   //Player score
   stroke(0);
   fill(255, 255, 255);
-  text(score, mypos.x + 22, mypos.y + 18);
+  text(score, mypos.x + playerSize, mypos.y + 18);
 
   pop();
 }
