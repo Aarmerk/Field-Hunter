@@ -71,7 +71,7 @@ var linesIntersect = false;
 var theta;
 
 // Player
-const playerHue = Math.round(Math.random() * 255);
+const playerHue = Math.floor(Math.random() * Math.floor(361));
 const playerColor = 'hsl(' + playerHue + ', 100%, 55%)';
 let playerImage;
 
