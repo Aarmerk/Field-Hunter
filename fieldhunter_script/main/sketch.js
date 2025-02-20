@@ -25,7 +25,7 @@ let scoreButton;
 let scoreImgs = [];
 
 // API key for map provider.
-var key = 'pk.eyJ1Ijoic2ltdGluIiwiYSI6ImNraW5mODU2ajA4ZTUyem1sMGQ1MXRsYmYifQ.QiM3UZyf58-ehmisIRHQnw';
+var key = 'YOUR-MAPBOX-KEY';
 
 // Create a new Mappa instance.
 var mappa = new Mappa('MapboxGL', key);
@@ -106,13 +106,13 @@ function setup() {
 	theta = 0; 
 
   var firebaseConfig = {
-    apiKey: "AIzaSyDMnC4vT3VmhMeaMzE1o8WR_OoydFLSssQ",
-    authDomain: "fieldhunter2-9f40b.firebaseapp.com",
-    databaseURL: "https://fieldhunter2-9f40b-default-rtdb.firebaseio.com",
-    projectId: "fieldhunter2-9f40b",
-    storageBucket: "fieldhunter2-9f40b.appspot.com",
-    messagingSenderId: "1090412845541",
-    appId: "1:1090412845541:web:5f115b9ed995728cecf70c"
+    apiKey: "YOUR-API-KEY",
+    authDomain: "YOUR-AUTH-DOMAIN",
+    databaseURL: "YOUR-DATABASE-URL",
+    projectId: "YOUR-PROJECT-ID",
+    storageBucket: "YOUR-STORAGE-BUCKET",
+    messagingSenderId: "YOUR-MESSAGING-SENDER-ID",
+    appId: "YOUR-APP-ID"
   };
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
